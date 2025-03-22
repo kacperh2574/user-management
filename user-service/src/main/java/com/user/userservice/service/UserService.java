@@ -2,6 +2,7 @@ package com.user.userservice.service;
 
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
+import com.user.userservice.exception.EmailAlreadyExistsException;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
@@ -27,6 +28,10 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
+            throw new EmailAlreadyExistsException("A user with this email already exists: " + userRequestDTO.getEmail());
+        }
+
         User newUser = userRepository.save(
                 UserMapper.toModel(userRequestDTO)
         );
