@@ -4,6 +4,8 @@ import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.dto.validator.CreateUserValidationGroup;
 import com.user.userservice.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.groups.Default;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -14,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
+@Tag(name = "User", description = "API for managing users")
 public class UserController {
 
     private final UserService userService;
@@ -23,6 +26,7 @@ public class UserController {
     }
 
     @GetMapping
+    @Operation(summary = "Get users")
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
         List<UserResponseDTO> userResponseDTOs = userService.getUsers();
 
@@ -30,6 +34,7 @@ public class UserController {
     }
 
     @PostMapping
+    @Operation(summary = "Create a user")
     public ResponseEntity<UserResponseDTO> createUser(@Validated({Default.class, CreateUserValidationGroup.class}) @RequestBody UserRequestDTO userRequestDTO) {
         UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
 
@@ -37,6 +42,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Update a user")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable UUID id, @Validated({Default.class}) @RequestBody UserRequestDTO userRequestDTO) {
         UserResponseDTO userResponseDTO = userService.updateUser(id, userRequestDTO);
 
@@ -44,6 +50,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Delete a user")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
 
