@@ -5,6 +5,7 @@ import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -29,75 +30,54 @@ public class UserServiceTest {
     @InjectMocks
     UserService userService;
 
-    @Test
-    void getUsers_returnsAllUsers() {
-        User userA = createUserA();
-        User userB = createUserB();
-        List<User> users = List.of(userA, userB);
+    UUID id;
+    UserRequestDTO userRequestDTO;
+    User user;
 
-        when(userRepository.findAll()).thenReturn(users);
-
-        List<UserResponseDTO> userDTOs = userService.getUsers();
-
-        assertThat(users).hasSize(2);
-        assertThat(userDTOs)
-                .usingRecursiveComparison()
-                .isEqualTo(List.of(
-                        UserMapper.toDTO(userA),
-                        UserMapper.toDTO(userB)
-                ));
+    @BeforeEach
+    void setUp() {
+        id = UUID.randomUUID();
+        userRequestDTO = createUserRequestDTO();
+        user = createUserA();
     }
 
     @Test
     void createUser_returnsCreatedUser() {
-        UserRequestDTO userRequestDTO = createUserRequestDTO();
-        User user = UserMapper.toModel(userRequestDTO);
-        User savedUser = User.builder()
-                .id(UUID.randomUUID())
-                .name(user.getName())
-                .email(user.getEmail())
-                .address(user.getAddress())
-                .dateOfBirth(user.getDateOfBirth())
-                .dateOfRegistration(user.getDateOfRegistration())
-                .build();
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        UserResponseDTO userResponse = userService.createUser(userRequestDTO);
 
-        UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
-
-        assertThat(userResponseDTO)
+        assertThat(userResponse)
                 .usingRecursiveComparison()
-                .isEqualTo(UserMapper.toDTO(savedUser));
+                .isEqualTo(UserMapper.toDTO(user));
+    }
+
+    @Test
+    void getUsers_returnsAllUsers() {
+        List<User> users = List.of(createUserA(), createUserB());
+        when(userRepository.findAll()).thenReturn(users);
+
+        List<UserResponseDTO> usersResponse = userService.getUsers();
+
+        assertThat(usersResponse)
+                .usingRecursiveComparison()
+                .isEqualTo(users.stream().map(UserMapper::toDTO).toList());
     }
 
     @Test
     void updateUser_returnsUpdatedUser() {
-        UUID id = UUID.fromString("c6adfd6e-deb6-4f9b-ada9-faef8a938657");
-        UserRequestDTO userRequestDTO = createUserRequestDTO();
-        User user = UserMapper.toModel(userRequestDTO);
-        User savedUser = User.builder()
-                .id(UUID.randomUUID())
-                .name(user.getName())
-                .email(user.getEmail())
-                .address(user.getAddress())
-                .dateOfBirth(user.getDateOfBirth())
-                .dateOfRegistration(user.getDateOfRegistration())
-                .build();
-
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
-        UserResponseDTO userResponseDTO = userService.updateUser(id, userRequestDTO);
+        UserResponseDTO userResponse = userService.updateUser(id, userRequestDTO);
 
-        assertThat(userResponseDTO)
+        assertThat(userResponse)
                 .usingRecursiveComparison()
-                .isEqualTo(UserMapper.toDTO(savedUser));
+                .isEqualTo(UserMapper.toDTO(user));
     }
 
     @Test
-    void deleteUser_returnsNoContent() {
-        UUID id = UUID.fromString("c6adfd6e-deb6-4f9b-ada9-faef8a938657");
-
+    void deleteUser_deletesUserById() {
         userService.deleteUser(id);
 
         verify(userRepository, times(1)).deleteById(id);

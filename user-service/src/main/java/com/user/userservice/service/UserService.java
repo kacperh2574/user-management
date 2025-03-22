@@ -22,46 +22,62 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public List<UserResponseDTO> getUsers() {
-        List<User> users = userRepository.findAll();
-
-        return users.stream()
-                .map(UserMapper::toDTO)
-                .toList();
-    }
-
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
-        if (userRepository.existsByEmail(userRequestDTO.getEmail())) {
-            throw new EmailAlreadyExistsException("A user with this email already exists: " + userRequestDTO.getEmail());
-        }
+        validateEmailUniquenessForCreate(userRequestDTO.getEmail());
 
-        User newUser = userRepository.save(
-                UserMapper.toModel(userRequestDTO)
-        );
+        User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
 
         return UserMapper.toDTO(newUser);
     }
 
+    public List<UserResponseDTO> getUsers() {
+        return userRepository
+                .findAll()
+                .stream()
+                .map(UserMapper::toDTO)
+                .toList();
+    }
+
     public UserResponseDTO updateUser(UUID id, UserRequestDTO userRequestDTO) {
-        User user = userRepository.findById(id).orElseThrow(() ->
-                new UserNotFoundException("A user with this ID not found: " + id)
-        );
+        User user = findUserById(id);
 
-        if (userRepository.existsByEmailAndIdNot(userRequestDTO.getEmail(), id)) {
-            throw new EmailAlreadyExistsException("A user with this email already exists: " + userRequestDTO.getEmail());
-        }
+        validateEmailUniquenessForUpdate(userRequestDTO.getEmail(), id);
 
-        user.setName(userRequestDTO.getName());
-        user.setEmail(userRequestDTO.getEmail());
-        user.setAddress(userRequestDTO.getAddress());
-        user.setDateOfBirth(LocalDate.parse(userRequestDTO.getDateOfBirth()));
+        User updatedUser = updateUserFields(user, userRequestDTO);
 
-        User updatedUser = userRepository.save(user);
+        updatedUser = userRepository.save(updatedUser);
 
         return UserMapper.toDTO(updatedUser);
     }
 
     public void deleteUser(UUID id) {
         userRepository.deleteById(id);
+    }
+
+    private User findUserById(UUID id) {
+        return userRepository
+                .findById(id)
+                .orElseThrow(() -> new UserNotFoundException("A user with this ID not found: " + id));
+    }
+
+    private User updateUserFields(User user, UserRequestDTO userRequestDTO) {
+        return user.toBuilder()
+                .name(userRequestDTO.getName())
+                .email(userRequestDTO.getEmail())
+                .address(userRequestDTO.getAddress())
+                .dateOfBirth(LocalDate.parse(userRequestDTO.getDateOfBirth()))
+                .build();
+    }
+
+    private void validateEmailUniquenessForCreate(String email) {
+        if (userRepository.existsByEmail(email)) {
+            throw new EmailAlreadyExistsException("A user with this email already exists: " + email);
+        }
+    }
+
+    private void validateEmailUniquenessForUpdate(String email, UUID id) {
+        if (userRepository.existsByEmailAndIdNot(email, id)) {
+            throw new EmailAlreadyExistsException("A user with this email already exists: " + email);
+        }
     }
 }
