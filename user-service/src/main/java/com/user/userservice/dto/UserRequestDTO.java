@@ -1,5 +1,6 @@
 package com.user.userservice.dto;
 
+import com.user.userservice.dto.validator.CreateUserValidationGroup;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -26,6 +27,6 @@ public class UserRequestDTO {
     @NotBlank(message = "Date of birth is required")
     private String dateOfBirth;
 
-    @NotBlank(message = "Date of registration is required")
+    @NotBlank(groups = CreateUserValidationGroup.class, message = "Date of registration is required")
     private String dateOfRegistration;
 }
