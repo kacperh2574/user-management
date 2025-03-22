@@ -1,5 +1,6 @@
 package com.user.userservice.util;
 
+import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.model.User;
 
 import java.time.LocalDate;
@@ -26,6 +27,16 @@ public class TestDataUtil {
                 .address("Address B")
                 .dateOfBirth(LocalDate.of(2024, 10, 10))
                 .dateOfRegistration(LocalDate.of(2024, 12, 10))
+                .build();
+    }
+
+    public static UserRequestDTO createUserRequestDTO() {
+        return UserRequestDTO.builder()
+                .name("User A")
+                .email("user.A@example.com")
+                .address("Address A")
+                .dateOfBirth("2025-10-10")
+                .dateOfRegistration("2025-12-10")
                 .build();
     }
 }

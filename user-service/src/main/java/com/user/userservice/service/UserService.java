@@ -1,5 +1,6 @@
 package com.user.userservice.service;
 
+import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
@@ -23,5 +24,13 @@ public class UserService {
         return users.stream()
                 .map(UserMapper::toDTO)
                 .toList();
+    }
+
+    public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
+        User newUser = userRepository.save(
+                UserMapper.toModel(userRequestDTO)
+        );
+
+        return UserMapper.toDTO(newUser);
     }
 }
