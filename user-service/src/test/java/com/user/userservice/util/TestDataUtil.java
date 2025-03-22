@@ -8,6 +8,16 @@ import java.util.UUID;
 
 public class TestDataUtil {
 
+    public static User createUserWithoutId() {
+        return User.builder()
+                .name("User")
+                .email("user@example.com")
+                .address("Address")
+                .dateOfBirth(LocalDate.of(2023, 10, 10))
+                .dateOfRegistration(LocalDate.of(2023, 12, 10))
+                .build();
+    }
+
     public static User createUserA() {
         return User.builder()
                 .id(UUID.fromString("c6adfd6e-deb6-4f9b-ada9-faef8a938657"))
