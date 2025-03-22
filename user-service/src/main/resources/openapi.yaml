@@ -1,0 +1,121 @@
+openapi: 3.0.4
+info:
+  title: Users OpenAPI documentation
+  version: v0
+servers:
+  - url: http://localhost:4000
+    description: Generated server url
+tags:
+  - name: User
+    description: API for managing users
+paths:
+  /users/{id}:
+    put:
+      tags:
+        - User
+      summary: Update a user
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+    delete:
+      tags:
+        - User
+      summary: Delete a user
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+  /users:
+    get:
+      tags:
+        - User
+      summary: Get users
+      operationId: getUsers
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResponseDTO'
+    post:
+      tags:
+        - User
+      summary: Create a user
+      operationId: createUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/UserResponseDTO'
+components:
+  schemas:
+    UserRequestDTO:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 100
+          minLength: 0
+        email:
+          type: string
+        address:
+          type: string
+        dateOfBirth:
+          type: string
+        dateOfRegistration:
+          type: string
+      required:
+        - address
+        - dateOfBirth
+        - dateOfRegistration
+        - email
+        - name
+    UserResponseDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        address:
+          type: string
+        dateOfBirth:
+          type: string
