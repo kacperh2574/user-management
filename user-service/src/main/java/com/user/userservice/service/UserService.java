@@ -4,6 +4,7 @@ import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.exception.EmailAlreadyExistsException;
 import com.user.userservice.exception.UserNotFoundException;
+import com.user.userservice.grpc.BillingServiceGrpcClient;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
@@ -17,15 +18,19 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BillingServiceGrpcClient billingServiceGrpcClient;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
         this.userRepository = userRepository;
+        this.billingServiceGrpcClient = billingServiceGrpcClient;
     }
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
         validateEmailUniquenessForCreate(userRequestDTO.getEmail());
 
         User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
+
+        billingServiceGrpcClient.createBillingAccount(newUser.getId().toString(), newUser.getName(), newUser.getEmail());
 
         return UserMapper.toDTO(newUser);
     }

@@ -2,6 +2,7 @@ package com.user.userservice.service;
 
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
+import com.user.userservice.grpc.BillingServiceGrpcClient;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
@@ -27,6 +28,9 @@ public class UserServiceTest {
     @Mock
     UserRepository userRepository;
 
+    @Mock
+    BillingServiceGrpcClient billingServiceGrpcClient;
+
     @InjectMocks
     UserService userService;
 
@@ -50,6 +54,9 @@ public class UserServiceTest {
         assertThat(userResponse)
                 .usingRecursiveComparison()
                 .isEqualTo(UserMapper.toDTO(user));
+
+        verify(billingServiceGrpcClient, times(1))
+                .createBillingAccount(user.getId().toString(), user.getName(), user.getEmail());
     }
 
     @Test
