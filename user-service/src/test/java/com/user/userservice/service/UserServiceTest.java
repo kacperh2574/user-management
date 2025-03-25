@@ -3,6 +3,7 @@ package com.user.userservice.service;
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.grpc.BillingServiceGrpcClient;
+import com.user.userservice.kafka.KafkaProducer;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
@@ -31,6 +32,9 @@ public class UserServiceTest {
     @Mock
     BillingServiceGrpcClient billingServiceGrpcClient;
 
+    @Mock
+    KafkaProducer kafkaProducer;
+
     @InjectMocks
     UserService userService;
 
@@ -57,6 +61,8 @@ public class UserServiceTest {
 
         verify(billingServiceGrpcClient, times(1))
                 .createBillingAccount(user.getId().toString(), user.getName(), user.getEmail());
+        verify(kafkaProducer, times(1))
+                .sendEvent(user);
     }
 
     @Test
