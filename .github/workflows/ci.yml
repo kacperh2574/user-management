@@ -50,6 +50,9 @@ jobs:
           distribution: 'corretto'
           cache: maven
 
+      - name: Build and test analytics-service
+        run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
+
       - name: Build and test billing-service
         run: ./billing-service/mvnw -B clean verify --file billing-service/pom.xml
 
