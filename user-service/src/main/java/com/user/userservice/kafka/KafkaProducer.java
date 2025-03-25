@@ -29,7 +29,7 @@ public class KafkaProducer {
         try {
             kafkaTemplate.send("user", event.toByteArray());
 
-            log.info("USER_CREATED event sent to user: {}", user.getId());
+            log.info("USER_CREATED event sent to user topic: {}", user.getId());
         } catch (Exception e) {
             log.info("Error sending USER_CREATED event to user topic: {}", event);
         }

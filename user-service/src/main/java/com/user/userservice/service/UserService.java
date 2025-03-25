@@ -5,6 +5,7 @@ import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.exception.EmailAlreadyExistsException;
 import com.user.userservice.exception.UserNotFoundException;
 import com.user.userservice.grpc.BillingServiceGrpcClient;
+import com.user.userservice.kafka.KafkaProducer;
 import com.user.userservice.mapper.UserMapper;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
@@ -19,10 +20,12 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final BillingServiceGrpcClient billingServiceGrpcClient;
+    private final KafkaProducer kafkaProducer;
 
-    public UserService(UserRepository userRepository, BillingServiceGrpcClient billingServiceGrpcClient) {
+    public UserService(UserRepository userRepository, BillingServiceGrpcClient billingServiceGrpcClient, KafkaProducer kafkaProducer) {
         this.userRepository = userRepository;
         this.billingServiceGrpcClient = billingServiceGrpcClient;
+        this.kafkaProducer = kafkaProducer;
     }
 
     public UserResponseDTO createUser(UserRequestDTO userRequestDTO) {
@@ -30,7 +33,11 @@ public class UserService {
 
         User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
 
-        billingServiceGrpcClient.createBillingAccount(newUser.getId().toString(), newUser.getName(), newUser.getEmail());
+        billingServiceGrpcClient.createBillingAccount(
+                newUser.getId().toString(), newUser.getName(), newUser.getEmail()
+        );
+
+        kafkaProducer.sendEvent(newUser);
 
         return UserMapper.toDTO(newUser);
     }
