@@ -18,6 +18,18 @@ services:
     networks:
       - internal
 
+  analytics-service:
+    build:
+      context: ./analytics-service
+    ports:
+      - "4002:4002"
+    networks:
+      - internal
+    depends_on:
+      - kafka
+    environment:
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+
   billing-service:
     build:
       context: ./billing-service
