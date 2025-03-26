@@ -90,8 +90,6 @@ services:
   user-service:
     build:
       context: ./user-service
-    ports:
-      - "4000:4000"
     networks:
       - internal
     depends_on:
