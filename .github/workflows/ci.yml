@@ -42,6 +42,8 @@ jobs:
         run: |
           chmod +x ./user-service/mvnw
           chmod +x ./billing-service/mvnw
+          ls -l
+          ls -l ./analytics-service
           chmod +x ./analytics-service/mvnw
 
       - name: Set up JDK 21
