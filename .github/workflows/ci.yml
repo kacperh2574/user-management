@@ -14,7 +14,7 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     services:
-      postgres:
+      user-service-db:
         image: postgres:latest
         env:
           POSTGRES_USER: admin_user
@@ -22,6 +22,14 @@ jobs:
           POSTGRES_DB: db
         ports:
           - 5000:5432
+      auth-service-db:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: admin_user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: db
+        ports:
+          - 5001:5432
       kafka:
         image: bitnami/kafka:latest
         env:
@@ -50,6 +58,9 @@ jobs:
           java-version: '21'
           distribution: 'corretto'
           cache: maven
+
+      - name: Build and test auth-service
+        run: ./auth-service/mvnw -B clean verify --file auth-service/pom.xml
 
       - name: Build and test analytics-service
         run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
