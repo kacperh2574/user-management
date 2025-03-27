@@ -51,8 +51,6 @@ jobs:
           chmod +x ./user-service/mvnw
           chmod +x ./billing-service/mvnw
           chmod +x ./analytics-service/mvnw
-          ls -l
-          ls -l ./auth-service
           chmod +x ./auth-service/mvnw
 
       - name: Set up JDK 21
