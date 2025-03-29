@@ -22,6 +22,14 @@ jobs:
           POSTGRES_DB: db
         ports:
           - 5000:5432
+      auth-service-db:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: admin_user
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: db
+        ports:
+          - 5001:5432
       kafka:
         image: bitnami/kafka:latest
         env:
@@ -43,6 +51,7 @@ jobs:
           chmod +x ./user-service/mvnw
           chmod +x ./billing-service/mvnw
           chmod +x ./analytics-service/mvnw
+          chmod +x ./auth-service/mvnw
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -53,6 +62,9 @@ jobs:
 
       - name: Build and test analytics-service
         run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
+
+      - name: Build and test auth-service
+        run: ./auth-service/mvnw -B clean verify --file auth-service/pom.xml
 
       - name: Build and test billing-service
         run: ./billing-service/mvnw -B clean verify --file billing-service/pom.xml
