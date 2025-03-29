@@ -1,5 +1,6 @@
 package com.user.authservice.service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.user.authservice.dto.LoginRequestDTO;
 import com.user.authservice.util.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,5 +29,14 @@ public class AuthService {
                 .map(user -> jwtUtil.generateToken(
                         user.getEmail(), user.getRole())
                 );
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            jwtUtil.verifyToken(token);
+            return true;
+        } catch (JWTVerificationException e){
+            return false;
+        }
     }
 }

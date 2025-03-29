@@ -1,9 +1,12 @@
 package com.user.authservice.service;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.user.authservice.dto.LoginRequestDTO;
 import com.user.authservice.model.User;
 import com.user.authservice.util.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,57 +34,87 @@ class AuthServiceTest {
     @InjectMocks
     private AuthService authService;
 
-    private LoginRequestDTO loginRequest;
-    private User user;
+    String validToken = "token";
+    String invalidToken = "invalid-token";
+    LoginRequestDTO loginRequest;
+    User user;
 
-    @BeforeEach
-    void setUp() {
-        loginRequest = LoginRequestDTO.builder()
-                .email("test@email.com")
-                .password("password")
-                .build();
+    @Nested
+    class Authenticate {
 
-        user = User.builder()
-                .email("test@email.com")
-                .password("encoded-password")
-                .role("USER")
-                .build();
+        @BeforeEach
+        void setUp() {
+            loginRequest = LoginRequestDTO.builder()
+                    .email("test@email.com")
+                    .password("password")
+                    .build();
+
+            user = User.builder()
+                    .email("test@email.com")
+                    .password("encoded-password")
+                    .role("USER")
+                    .build();
+        }
+
+        @Test
+        void returnsValidTokenOptional() {
+            when(userService.findByEmail(loginRequest.getEmail()))
+                    .thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
+                    .thenReturn(true);
+            when(jwtUtil.generateToken(user.getEmail(), user.getRole()))
+                    .thenReturn(validToken);
+
+            Optional<String> result = authService.authenticate(loginRequest);
+
+            assertTrue(result.isPresent());
+            assertEquals(validToken, result.get());
+        }
+
+        @Test
+        void returnsEmptyOptional_whenUserDoesNotExist() {
+            when(userService.findByEmail(loginRequest.getEmail()))
+                    .thenReturn(Optional.empty());
+
+            Optional<String> result = authService.authenticate(loginRequest);
+
+            assertFalse(result.isPresent());
+        }
+
+        @Test
+        void returnsEmptyOptional_whenPasswordDoesNotMatch() {
+            when(userService.findByEmail(loginRequest.getEmail()))
+                    .thenReturn(Optional.of(user));
+            when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
+                    .thenReturn(false);
+
+            Optional<String> result = authService.authenticate(loginRequest);
+
+            assertFalse(result.isPresent());
+        }
     }
 
-    @Test
-    void authenticate_returnsValidTokenOptional() {
-        when(userService.findByEmail(loginRequest.getEmail()))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
-                .thenReturn(true);
-        when(jwtUtil.generateToken(user.getEmail(), user.getRole()))
-                .thenReturn("token");
+    @Nested
+    class ValidateToken {
+        @Test
+        void returnsTrue_whenTokenIsValid() {
+            when(jwtUtil.verifyToken(validToken))
+                    .thenReturn(mock(DecodedJWT.class));
 
-        Optional<String> token = authService.authenticate(loginRequest);
+            boolean result = authService.validateToken(validToken);
 
-        assertTrue(token.isPresent());
-        assertEquals("token", token.get());
-    }
+            assertTrue(result);
+        }
 
-    @Test
-    void authenticate_returnsEmptyOptional_whenUserDoesNotExist() {
-        when(userService.findByEmail(loginRequest.getEmail()))
-                .thenReturn(Optional.empty());
+        @Test
+        void returnsFalse_whenTokenIsNotValid() {
+            doThrow(new JWTVerificationException("Invalid JWT"))
+                    .when(jwtUtil)
+                    .verifyToken(invalidToken);
 
-        Optional<String> token = authService.authenticate(loginRequest);
+            boolean result = authService.validateToken(invalidToken);
 
-        assertFalse(token.isPresent());
-    }
-
-    @Test
-    void authenticate_returnsEmptyOptional_whenPasswordDoesNotMatch() {
-        when(userService.findByEmail(loginRequest.getEmail()))
-                .thenReturn(Optional.of(user));
-        when(passwordEncoder.matches(loginRequest.getPassword(), user.getPassword()))
-                .thenReturn(false);
-
-        Optional<String> token = authService.authenticate(loginRequest);
-
-        assertFalse(token.isPresent());
+            assertFalse(result);
+        }
     }
 }
