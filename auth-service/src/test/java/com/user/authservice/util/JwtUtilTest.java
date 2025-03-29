@@ -1,28 +1,53 @@
 package com.user.authservice.util;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Base64;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-public class JwtUtilTest {
+class JwtUtilTest {
+
+    String secret = Base64.getEncoder().encodeToString("secret-key".getBytes());
+    String email = "test@email.com";
+    String role = "USER";
 
     private JwtUtil jwtUtil;
 
-    private final String email = "test@email.com";
-    private final String role = "USER";
-
     @BeforeEach
     void setUp() {
-        String testSecret = "gY3pRoizllPk8P2VuvwtNdyaojyMg61oSiofQEQ8N2Q=";
-
-        jwtUtil = new JwtUtil(testSecret);
+        jwtUtil = new JwtUtil(secret);
     }
 
     @Test
-    void generateToken_returnsToken() {
-        String token = jwtUtil.generateToken(email, role);
+    void generateToken_returnsValidToken() {
+        String result = jwtUtil.generateToken(email, role);
 
-        assertNotNull(token);
+        assertNotNull(result);
+        assertFalse(result.isEmpty());
+    }
+
+    @Test
+    void verifyToken_returnsDecodedJWT_whenTokenIsValid() {
+        String validToken = jwtUtil.generateToken(email, role);
+        DecodedJWT result = jwtUtil.verifyToken(validToken);
+
+        assertNotNull(result);
+        assertEquals(email, result.getSubject());
+        assertEquals(role, result.getClaim("role").asString());
+    }
+
+    @Test
+    void verifyToken_throwsException_whenTokenIsNotValid() {
+        String invalidToken = "invalid-token";
+
+        JWTVerificationException exception = assertThrows(JWTVerificationException.class, () ->
+                jwtUtil.verifyToken(invalidToken)
+        );
+
+        assertEquals("Invalid JWT", exception.getMessage());
     }
 }
