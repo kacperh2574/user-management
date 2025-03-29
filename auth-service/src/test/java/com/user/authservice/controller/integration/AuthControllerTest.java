@@ -14,6 +14,7 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static com.user.authservice.util.TestDataUtil.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -33,16 +34,14 @@ public class AuthControllerTest {
     JwtUtil jwtUtil;
 
     String validToken;
+    String loginPath = "/login";
+    String validatePath = "/validate";
 
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
 
-        User user = User.builder()
-                .email("test@email.com")
-                .password(passwordEncoder.encode("password"))
-                .role("USER")
-                .build();
+        User user = createUser(passwordEncoder);
         userRepository.save(user);
         validToken = jwtUtil.generateToken(user.getEmail(), user.getRole());
     }
@@ -51,13 +50,10 @@ public class AuthControllerTest {
     class Login {
 
         @Test
-        void returnsOk_whenUserAuthenticated() {
-            LoginRequestDTO request = LoginRequestDTO.builder()
-                    .email("test@email.com")
-                    .password("password")
-                    .build();
+        void returnsOk_whenUserIsAuthenticated() {
+            LoginRequestDTO request = createValidLoginRequestDTO();
 
-            ResponseEntity<LoginResponseDTO> response = restTemplate.postForEntity("/login", request, LoginResponseDTO.class);
+            ResponseEntity<LoginResponseDTO> response = restTemplate.postForEntity(loginPath, request, LoginResponseDTO.class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
             assertNotNull(response.getBody());
@@ -65,13 +61,10 @@ public class AuthControllerTest {
         }
 
         @Test
-        void returnsUnauthorized_whenUserNotAuthenticated() {
-            LoginRequestDTO request = LoginRequestDTO.builder()
-                    .email("test@email.com")
-                    .password("invalid-password")
-                    .build();
+        void returnsUnauthorized_whenUserIsNotAuthenticated() {
+            LoginRequestDTO request = createInvalidLoginRequestDTO();
 
-            ResponseEntity<Void> response = restTemplate.postForEntity("/login", request, Void.class);
+            ResponseEntity<Void> response = restTemplate.postForEntity(loginPath, request, Void.class);
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
@@ -82,29 +75,25 @@ public class AuthControllerTest {
 
         @Test
         void returnsOk_whenTokenIsValid() {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer " + validToken);
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            HttpEntity<Void> requestEntity = createRequestEntity(validToken);
 
-            ResponseEntity<Void> response = restTemplate.exchange("/validate", HttpMethod.GET, requestEntity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(validatePath, HttpMethod.GET, requestEntity, Void.class);
 
             assertEquals(HttpStatus.OK, response.getStatusCode());
         }
 
         @Test
         void returnsUnauthorized_whenTokenIsNotValid() {
-            HttpHeaders headers = new HttpHeaders();
-            headers.set("Authorization", "Bearer invalid-token");
-            HttpEntity<Void> requestEntity = new HttpEntity<>(headers);
+            HttpEntity<Void> requestEntity = createRequestEntity("invalid-token");
 
-            ResponseEntity<Void> response = restTemplate.exchange("/validate", HttpMethod.GET, requestEntity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(validatePath, HttpMethod.GET, requestEntity, Void.class);
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }
 
         @Test
         void returnsUnauthorized_whenTokenIsMissing() {
-            ResponseEntity<Void> response = restTemplate.getForEntity("/validate", Void.class);
+            ResponseEntity<Void> response = restTemplate.getForEntity(validatePath, Void.class);
 
             assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
         }

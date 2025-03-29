@@ -8,8 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @RestController
 public class AuthController {
 
@@ -21,29 +19,26 @@ public class AuthController {
 
     @Operation(summary = "Generate token on user login")
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDTO> login(
-            @RequestBody LoginRequestDTO loginRequestDTO) {
-
-        Optional<String> tokenOptional = authService.authenticate(loginRequestDTO);
-
-        if (tokenOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        String token = tokenOptional.get();
-        return ResponseEntity.ok(new LoginResponseDTO(token));
+    public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+        return authService.authenticate(loginRequestDTO)
+                .map(token -> ResponseEntity.ok(new LoginResponseDTO(token)))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     @Operation(summary = "Validate Token")
     @GetMapping("/validate")
     public ResponseEntity<Void> validate(@RequestHeader(value = "Authorization", required = false) String authHeader) {
 
-        if(authHeader == null || !authHeader.startsWith("Bearer ")) {
+        if(isAuthHeaderInvalid(authHeader)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
         return authService.validateToken(authHeader.substring(7))
                 ? ResponseEntity.ok().build()
                 : ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    }
+
+    private boolean isAuthHeaderInvalid(String authHeader) {
+        return authHeader == null || !authHeader.startsWith("Bearer ");
     }
 }
