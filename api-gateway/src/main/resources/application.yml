@@ -18,6 +18,7 @@ spring:
             - Path=/api/users/**
           filters:
             - StripPrefix=1
+            - JwtValidation
 
         - id: api-docs-user-route
           uri: http://user-service:4000
@@ -25,3 +26,7 @@ spring:
             - Path=/api-docs/users
           filters:
             - RewritePath=/api-docs/users,/v3/api-docs
+
+auth:
+  service:
+    url: "localhost:4005"
