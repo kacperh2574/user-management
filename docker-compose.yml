@@ -62,8 +62,6 @@ services:
   auth-service:
     build:
       context: ./auth-service
-    ports:
-      - "4005:4005"
     networks:
       - internal
     depends_on:
