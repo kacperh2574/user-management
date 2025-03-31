@@ -1,7 +1,10 @@
 package com.user.userservice.controller.integration;
 
+import billing.BillingResponse;
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
+import com.user.userservice.grpc.BillingServiceGrpcClient;
+import com.user.userservice.kafka.KafkaProducer;
 import com.user.userservice.model.User;
 import com.user.userservice.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +16,12 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import static com.user.userservice.util.TestDataUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {
@@ -25,6 +31,12 @@ public class UserControllerTest {
 
     @Autowired
     UserRepository userRepository;
+
+    @MockitoBean
+    BillingServiceGrpcClient billingServiceGrpcClient;
+
+    @MockitoBean
+    KafkaProducer kafkaProducer;
 
     @BeforeEach
     void setUp() {
@@ -46,6 +58,10 @@ public class UserControllerTest {
 
     @Test
     void createUser() {
+        when(billingServiceGrpcClient.createBillingAccount(any(), any(), any()))
+                .thenReturn(BillingResponse.newBuilder().build());
+        doNothing().when(kafkaProducer).sendEvent(any());
+
         UserRequestDTO userRequestDTO = createUserRequestDTO();
 
         ResponseEntity<UserResponseDTO> response = restTemplate.postForEntity("/users", userRequestDTO, UserResponseDTO.class);
