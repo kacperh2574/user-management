@@ -94,7 +94,9 @@ jobs:
 
       - name: Start api-gateway
         run: |
-          docker run -d -p 4004:4004 --name api-gateway --network internal api-gateway:latest
+          docker run -d -p 4004:4004 --name api-gateway --network internal \
+            --add-host=host.docker.internal:host-gateway \
+            api-gateway:latest
 
       - name: Build and test analytics-service
         run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
@@ -120,4 +122,4 @@ jobs:
       - name: Build and test api-gateway
         run: ./api-gateway/mvnw -B clean verify --file api-gateway/pom.xml
         env:
-          AUTH_SERVICE_URL: http://auth-service:4005
+          AUTH_SERVICE_URL: http://localhost:4005
