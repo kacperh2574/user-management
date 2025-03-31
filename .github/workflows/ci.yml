@@ -100,7 +100,7 @@ jobs:
 
       - name: Start user-service
         run: |
-          docker run -d -p 4004:4004 --name user-service user-service:latest
+          docker run -d -p 4000:4000 --name user-service user-service:latest
 
       - name: Build and test api-gateway
         run: ./api-gateway/mvnw -B clean verify --file api-gateway/pom.xml
