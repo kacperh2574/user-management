@@ -15,7 +15,7 @@ public class UserTest {
     @BeforeAll
     static void setUp() {
         webTestClient = WebTestClient.bindToServer()
-                .baseUrl("http://api-gateway:4004")
+                .baseUrl("http://localhost:4004")
                 .build();
     }
 

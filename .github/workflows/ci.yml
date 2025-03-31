@@ -61,6 +61,41 @@ jobs:
           distribution: 'corretto'
           cache: maven
 
+      - name: Build Docker image for auth-service
+        run: |
+          docker build -t auth-service ./auth-service
+
+      - name: Build Docker image for billing-service
+        run: |
+          docker build -t billing-service ./billing-service
+
+      - name: Build Docker image for user-service
+        run: |
+          docker build -t user-service ./user-service
+
+      - name: Build Docker image for api-gateway
+        run: |
+          docker build -t api-gateway ./api-gateway
+
+      - name: Create Docker network
+        run: docker network create internal
+
+      - name: Start auth service
+        run: |
+          docker run -d --name auth-service --network internal auth-service:latest
+
+      - name: Start billing-service
+        run: |
+          docker run -d -p 9001:9001 -p 4001:4001 --name billing-service --network internal billing-service:latest
+
+      - name: Start user-service
+        run: |
+          docker run -d -p 4000:4000 --name user-service --network internal user-service:latest
+
+      - name: Start api-gateway
+        run: |
+          docker run -d -p 4004:4004 --name api-gateway --network internal api-gateway:latest
+
       - name: Build and test analytics-service
         run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
 
@@ -69,43 +104,6 @@ jobs:
 
       - name: Build and test billing-service
         run: ./billing-service/mvnw -B clean verify --file billing-service/pom.xml
-
-      - name: Build Docker image for auth-service
-        run: |
-          docker build -t auth-service ./auth-service
-
-      - name: Start auth service
-        run: |
-          docker run -d --name auth-service auth-service:latest
-
-      - name: Build Docker image for billing-service
-        run: |
-          docker build -t billing-service ./billing-service
-
-      - name: Start billing-service
-        run: |
-          docker run -d -p 9001:9001 -p 4001:4001 --name billing-service billing-service:latest
-
-      - name: Build Docker image for api-gateway
-        run: |
-          docker build -t api-gateway ./api-gateway
-
-      - name: Start api-gateway
-        run: |
-          docker run -d -p 4004:4004 --name api-gateway api-gateway:latest
-
-      - name: Build Docker image for user-service
-        run: |
-          docker build -t user-service ./user-service
-
-      - name: Start user-service
-        run: |
-          docker run -d -p 4000:4000 --name user-service user-service:latest
-
-      - name: Build and test api-gateway
-        run: ./api-gateway/mvnw -B clean verify --file api-gateway/pom.xml
-        env:
-          AUTH_SERVICE_URL: http://auth-service:4005
 
       - name: Build and test user-service
         run: ./user-service/mvnw -B clean verify --file user-service/pom.xml
@@ -118,3 +116,8 @@ jobs:
           BILLING_SERVICE_ADDRESS: localhost
           BILLING_SERVICE_GRPC_PORT: 9001
           SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092
+
+      - name: Build and test api-gateway
+        run: ./api-gateway/mvnw -B clean verify --file api-gateway/pom.xml
+        env:
+          AUTH_SERVICE_URL: http://auth-service:4005
