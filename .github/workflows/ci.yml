@@ -54,7 +54,7 @@ jobs:
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
             echo "Running tests for $service..."
-            (cd $service && ./mvnw verify)
+            (cd $service && ./mvnw verify -X)
           done
 
       - name: 🛑 Stop and clean up services
