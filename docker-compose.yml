@@ -18,6 +18,16 @@ services:
     networks:
       - internal
 
+  api-gateway:
+    build:
+      context: ./api-gateway
+    ports:
+      - "4004:4004"
+    networks:
+      - internal
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:4005
+
   analytics-service:
     build:
       context: ./analytics-service
@@ -54,8 +64,6 @@ services:
   auth-service:
     build:
       context: ./auth-service
-    ports:
-      - "4005:4005"
     networks:
       - internal
     depends_on:
@@ -82,8 +90,6 @@ services:
   user-service:
     build:
       context: ./user-service
-    ports:
-      - "4000:4000"
     networks:
       - internal
     depends_on:
