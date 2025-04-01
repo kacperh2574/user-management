@@ -47,6 +47,9 @@ jobs:
       - name: ⏳ Wait for services to be ready
         run: sleep 30
 
+      - name: 🛠 Set executable permissions
+        run: find . -type f -name "mvnw" -exec chmod +x {} +
+
       - name: 🔥 Run tests
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
