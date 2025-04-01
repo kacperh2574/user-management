@@ -27,6 +27,13 @@ spring:
           filters:
             - RewritePath=/api-docs/users,/v3/api-docs
 
+        - id: api-docs-auth-route
+          uri: http://auth-service:4005
+          predicates:
+            - Path=/api-docs/auth
+          filters:
+            - RewritePath=/api-docs/auth,/v3/api-docs
+
 auth:
   service:
     url: "localhost:4005"
