@@ -11,8 +11,29 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
+  build:
     runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: maven
+
+      - name: 🛠 Build all microservices
+        run: |
+          for service in user-service billing-service analytics-service auth-service api-gateway; do
+            echo "Building $service..."
+            (cd $service && ./mvnw clean package -DskipTests)
+          done
+
+  test:
+    runs-on: ubuntu-latest
+    needs: build
     services:
       user-service-db:
         image: postgres:latest
@@ -43,86 +64,21 @@ jobs:
         ports:
           - 9092:9092
     steps:
-      - name: Checkout code
+      - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: Set executable permissions for mvnw
+      - name: 🚀 Start services with docker-compose
+        run: docker-compose up -d --build
+
+      - name: ⏳ Wait for services to be ready
+        run: sleep 30
+
+      - name: 🔥 Run tests
         run: |
-          chmod +x ./user-service/mvnw
-          chmod +x ./billing-service/mvnw
-          chmod +x ./analytics-service/mvnw
-          chmod +x ./auth-service/mvnw
-          chmod +x ./api-gateway/mvnw
+          for service in user-service billing-service analytics-service auth-service api-gateway; do
+            echo "Running tests for $service..."
+            (cd $service && ./mvnw verify)
+          done
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'corretto'
-          cache: maven
-
-      - name: Build Docker image for auth-service
-        run: |
-          docker build -t auth-service ./auth-service
-
-      - name: Build Docker image for billing-service
-        run: |
-          docker build -t billing-service ./billing-service
-
-      - name: Build Docker image for user-service
-        run: |
-          docker build -t user-service ./user-service
-
-      - name: Build Docker image for api-gateway
-        run: |
-          docker build -t api-gateway ./api-gateway
-
-      - name: Create Docker network
-        run: docker network create internal
-
-      - name: Start auth service
-        run: |
-          docker run -d --name auth-service --network internal auth-service:latest
-
-      - name: Start billing-service
-        run: |
-          docker run -d -p 9001:9001 -p 4001:4001 --name billing-service --network internal billing-service:latest
-
-      - name: Build and test user-service
-        run: ./user-service/mvnw -B clean verify --file user-service/pom.xml
-        env:
-          SPRING_DATASOURCE_USERNAME: admin_user
-          SPRING_DATASOURCE_PASSWORD: password
-          SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5000/db
-          SPRING_JPA_HIBERNATE_DDL_AUTO: update
-          SPRING_SQL_INIT_MODE: always
-          BILLING_SERVICE_ADDRESS: localhost
-          BILLING_SERVICE_GRPC_PORT: 9001
-          SPRING_KAFKA_BOOTSTRAP_SERVERS: localhost:9092
-
-      - name: Stop billing-service
-        run: docker stop billing-service && docker rm billing-service
-
-      - name: Start user-service
-        run: |
-          docker run -d -p 4000:4000 --name user-service --network internal user-service:latest
-
-      - name: Start api-gateway
-        run: |
-          docker run -d -p 4004:4004 --name api-gateway --network internal \
-            --add-host=host.docker.internal:host-gateway \
-            api-gateway:latest
-
-      - name: Build and test analytics-service
-        run: ./analytics-service/mvnw -B clean verify --file analytics-service/pom.xml
-
-      - name: Build and test auth-service
-        run: ./auth-service/mvnw -B clean verify --file auth-service/pom.xml
-
-      - name: Build and test billing-service
-        run: ./billing-service/mvnw -B clean verify --file billing-service/pom.xml
-
-      - name: Build and test api-gateway
-        run: ./api-gateway/mvnw -B clean verify --file api-gateway/pom.xml
-        env:
-          AUTH_SERVICE_URL: http://localhost:4005
+      - name: 🛑 Stop and clean up services
+        run: docker-compose down
