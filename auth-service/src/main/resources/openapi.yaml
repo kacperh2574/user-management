@@ -1,0 +1,61 @@
+openapi: 3.0.4
+info:
+  title: OpenAPI definition
+  version: v0
+servers:
+  - url: http://auth-service:4005
+    description: Generated server url
+paths:
+  /login:
+    post:
+      tags:
+        - auth-controller
+      summary: Generate token on user login
+      operationId: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequestDTO'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                $ref: '#/components/schemas/LoginResponseDTO'
+  /validate:
+    get:
+      tags:
+        - auth-controller
+      summary: Validate Token
+      operationId: validate
+      parameters:
+        - name: Authorization
+          in: header
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+components:
+  schemas:
+    LoginRequestDTO:
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          maxLength: 2147483647
+          minLength: 8
+          type: string
+    LoginResponseDTO:
+      type: object
+      properties:
+        token:
+          type: string
