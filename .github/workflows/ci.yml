@@ -41,6 +41,13 @@ jobs:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
+      - name: ⚙️ Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'corretto'
+          cache: maven
+
       - name: 🚀 Start services with docker-compose
         run: docker compose up -d --build
 
@@ -54,7 +61,7 @@ jobs:
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
             echo "Running tests for $service..."
-            (cd $service && ./mvnw verify -X)
+            (cd $service && ./mvnw verify)
           done
 
       - name: 🛑 Stop and clean up services
