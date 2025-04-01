@@ -24,6 +24,9 @@ jobs:
           distribution: 'corretto'
           cache: maven
 
+      - name: Set executable permissions
+        run: find . -type f -name "mvnw" -exec chmod +x {} +
+
       - name: 🛠 Build all microservices
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
