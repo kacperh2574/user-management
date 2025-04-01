@@ -1,9 +1,9 @@
 openapi: 3.0.4
 info:
-  title: OpenAPI definition
+  title: Auth OpenAPI documentation
   version: v0
 servers:
-  - url: http://auth-service:4005
+  - url: http://localhost:4005
     description: Generated server url
 paths:
   /login:
