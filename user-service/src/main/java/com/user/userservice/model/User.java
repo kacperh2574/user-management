@@ -36,5 +36,6 @@ public class User {
     private LocalDate dateOfBirth;
 
     @NotNull
+    @Column(updatable = false)
     private LocalDate dateOfRegistration;
 }

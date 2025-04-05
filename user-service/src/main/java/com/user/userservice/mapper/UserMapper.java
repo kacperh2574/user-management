@@ -24,7 +24,7 @@ public class UserMapper {
                 .email(userRequestDTO.getEmail())
                 .address(userRequestDTO.getAddress())
                 .dateOfBirth(LocalDate.parse(userRequestDTO.getDateOfBirth()))
-                .dateOfRegistration(LocalDate.parse(userRequestDTO.getDateOfRegistration()))
+                .dateOfRegistration(LocalDate.now())
                 .build();
     }
 }

@@ -46,7 +46,6 @@ public class TestDataUtil {
                 .email("user.A@example.com")
                 .address("Address A")
                 .dateOfBirth("2025-10-10")
-                .dateOfRegistration("2025-12-10")
                 .build();
     }
 }
