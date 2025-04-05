@@ -44,6 +44,21 @@ public class UserControllerTest {
     }
 
     @Test
+    void createUser() {
+        when(billingServiceGrpcClient.createBillingAccount(any(), any(), any()))
+                .thenReturn(BillingResponse.newBuilder().build());
+        doNothing().when(kafkaProducer).sendEvent(any());
+
+        UserRequestDTO userRequestDTO = createUserRequestDTO();
+
+        ResponseEntity<UserResponseDTO> response = restTemplate.postForEntity("/users", userRequestDTO, UserResponseDTO.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo(userRequestDTO.getName());
+    }
+
+    @Test
     void getUser() {
         User user = createUserWithoutId();
 
@@ -67,21 +82,6 @@ public class UserControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).hasSize(1);
         assertThat(response.getBody()[0].getName()).isEqualTo("User");
-    }
-
-    @Test
-    void createUser() {
-        when(billingServiceGrpcClient.createBillingAccount(any(), any(), any()))
-                .thenReturn(BillingResponse.newBuilder().build());
-        doNothing().when(kafkaProducer).sendEvent(any());
-
-        UserRequestDTO userRequestDTO = createUserRequestDTO();
-
-        ResponseEntity<UserResponseDTO> response = restTemplate.postForEntity("/users", userRequestDTO, UserResponseDTO.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).isNotNull();
-        assertThat(response.getBody().getName()).isEqualTo(userRequestDTO.getName());
     }
 
     @Test

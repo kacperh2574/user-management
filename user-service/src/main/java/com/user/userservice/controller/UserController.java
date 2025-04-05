@@ -24,6 +24,14 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping
+    @Operation(summary = "Create a user")
+    public ResponseEntity<UserResponseDTO> createUser(@Validated({Default.class}) @RequestBody UserRequestDTO userRequestDTO) {
+        UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
+
+        return ResponseEntity.ok().body(userResponseDTO);
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get users")
     public ResponseEntity<UserResponseDTO> getUser(@PathVariable UUID id) {
@@ -38,14 +46,6 @@ public class UserController {
         List<UserResponseDTO> userResponseDTOs = userService.getUsers();
 
         return ResponseEntity.ok().body(userResponseDTOs);
-    }
-
-    @PostMapping
-    @Operation(summary = "Create a user")
-    public ResponseEntity<UserResponseDTO> createUser(@Validated({Default.class}) @RequestBody UserRequestDTO userRequestDTO) {
-        UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
-
-        return ResponseEntity.ok().body(userResponseDTO);
     }
 
     @PutMapping("/{id}")
