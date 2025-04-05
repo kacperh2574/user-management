@@ -48,8 +48,11 @@ jobs:
           distribution: 'corretto'
           cache: maven
 
+      - name: Create .env file with JWT_SECRET
+        run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" > .env
+
       - name: 🚀 Start services with docker-compose
-        run: docker compose up -d --build
+        run: docker compose --env-file .env up -d --build
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
