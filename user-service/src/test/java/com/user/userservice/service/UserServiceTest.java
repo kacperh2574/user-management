@@ -80,18 +80,6 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_returnsUpdatedUser() {
-        when(userRepository.findById(id)).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        UserResponseDTO userResponse = userService.updateUser(id, userRequestDTO);
-
-        assertThat(userResponse)
-                .usingRecursiveComparison()
-                .isEqualTo(UserMapper.toDTO(user));
-    }
-
-    @Test
     void updateUser_returnsUpdatedUser_whenUserExists() {
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
@@ -108,6 +96,15 @@ public class UserServiceTest {
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class, () -> userService.updateUser(id, userRequestDTO));
+    }
+
+    @Test
+    void deleteUser_deletesUser_whenUserExists() {
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        userService.deleteUser(id);
+
+        verify(userRepository, times(1)).deleteById(id);
     }
 
     @Test
