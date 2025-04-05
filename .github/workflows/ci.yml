@@ -53,7 +53,7 @@ jobs:
       - name: 🚀 Start services with docker-compose
         run: |
           export JWT_SECRET=${{ secrets.JWT_SECRET }}
-          docker-compose up -d --build
+          docker compose up -d --build
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
