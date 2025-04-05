@@ -51,7 +51,9 @@ jobs:
           cache: maven
 
       - name: 🚀 Start services with docker-compose
-        run: docker compose up -d --build
+        run: |
+          JWT_SECRET=${{ secrets.JWT_SECRET }} docker-compose up -d --build
+          echo $JWT_SECRET
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
