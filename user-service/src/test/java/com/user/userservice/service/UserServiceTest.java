@@ -2,6 +2,7 @@ package com.user.userservice.service;
 
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
+import com.user.userservice.exception.UserNotFoundException;
 import com.user.userservice.grpc.BillingServiceGrpcClient;
 import com.user.userservice.kafka.KafkaProducer;
 import com.user.userservice.mapper.UserMapper;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static com.user.userservice.util.TestDataUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -90,9 +92,16 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser_deletesUserById() {
+    void deleteUser_deletesUserById_whenUserExists() {
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
         userService.deleteUser(id);
 
         verify(userRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteUser_throwsException_whenUserDoesNotExist() {
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(id));
     }
 }
