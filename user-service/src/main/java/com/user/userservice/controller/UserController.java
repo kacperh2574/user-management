@@ -25,6 +25,14 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping("/{id}")
+    @Operation(summary = "Get users")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable UUID id) {
+        UserResponseDTO userResponseDTO = userService.getUser(id);
+
+        return ResponseEntity.ok().body(userResponseDTO);
+    }
+
     @GetMapping
     @Operation(summary = "Get users")
     public ResponseEntity<List<UserResponseDTO>> getUsers() {

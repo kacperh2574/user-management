@@ -44,6 +44,19 @@ public class UserControllerTest {
     }
 
     @Test
+    void getUser() {
+        User user = createUserWithoutId();
+
+        userRepository.save(user);
+
+        ResponseEntity<UserResponseDTO> response = restTemplate.getForEntity("/users/" + user.getId(), UserResponseDTO.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo("User");
+    }
+
+    @Test
     void getUsers() {
         User user = createUserWithoutId();
 

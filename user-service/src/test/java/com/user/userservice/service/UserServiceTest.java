@@ -68,6 +68,24 @@ public class UserServiceTest {
     }
 
     @Test
+    void getUser_returnsUser_whenUserExists() {
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        UserResponseDTO userResponse = userService.getUser(id);
+
+        assertThat(userResponse)
+                .usingRecursiveComparison()
+                .isEqualTo(UserMapper.toDTO(user));
+    }
+
+    @Test
+    void getUser_throwsException_whenUserDoesNotExist() {
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUser(id));
+    }
+
+    @Test
     void getUsers_returnsAllUsers() {
         List<User> users = List.of(createUserA(), createUserB());
         when(userRepository.findAll()).thenReturn(users);
