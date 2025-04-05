@@ -50,10 +50,11 @@ jobs:
           distribution: 'corretto'
           cache: maven
 
+      - name: Set JWT_SECRET
+        run: echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+
       - name: 🚀 Start services with docker-compose
-        run: |
-          export JWT_SECRET=${{ secrets.JWT_SECRET }}
-          docker compose up -d --build
+        run: docker compose up -d --build
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
