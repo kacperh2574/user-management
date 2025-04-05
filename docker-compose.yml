@@ -74,6 +74,7 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-service-db:5432/db
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
       - SPRING_SQL_INIT_MODE=always
+      - JWT_SECRET=${JWT_SECRET}
 
   user-service-db:
     image: postgres:latest
