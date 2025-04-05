@@ -2,7 +2,6 @@ package com.user.userservice.controller;
 
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
-import com.user.userservice.dto.validator.CreateUserValidationGroup;
 import com.user.userservice.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -25,20 +24,28 @@ public class UserController {
         this.userService = userService;
     }
 
+    @PostMapping
+    @Operation(summary = "Create a user")
+    public ResponseEntity<UserResponseDTO> createUser(@Validated({Default.class}) @RequestBody UserRequestDTO userRequestDTO) {
+        UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
+
+        return ResponseEntity.ok().body(userResponseDTO);
+    }
+
+    @GetMapping("/{id}")
+    @Operation(summary = "Get users")
+    public ResponseEntity<UserResponseDTO> getUser(@PathVariable UUID id) {
+        UserResponseDTO userResponseDTO = userService.getUser(id);
+
+        return ResponseEntity.ok().body(userResponseDTO);
+    }
+
     @GetMapping
     @Operation(summary = "Get users")
     public ResponseEntity<List<UserResponseDTO>> getUsers() {
         List<UserResponseDTO> userResponseDTOs = userService.getUsers();
 
         return ResponseEntity.ok().body(userResponseDTOs);
-    }
-
-    @PostMapping
-    @Operation(summary = "Create a user")
-    public ResponseEntity<UserResponseDTO> createUser(@Validated({Default.class, CreateUserValidationGroup.class}) @RequestBody UserRequestDTO userRequestDTO) {
-        UserResponseDTO userResponseDTO = userService.createUser(userRequestDTO);
-
-        return ResponseEntity.ok().body(userResponseDTO);
     }
 
     @PutMapping("/{id}")

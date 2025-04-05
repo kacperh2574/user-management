@@ -42,6 +42,12 @@ public class UserService {
         return UserMapper.toDTO(newUser);
     }
 
+    public UserResponseDTO getUser(UUID id) {
+        User user = findUserById(id);
+
+        return UserMapper.toDTO(user);
+    }
+
     public List<UserResponseDTO> getUsers() {
         return userRepository
                 .findAll()
@@ -63,6 +69,8 @@ public class UserService {
     }
 
     public void deleteUser(UUID id) {
+        findUserById(id);
+
         userRepository.deleteById(id);
     }
 

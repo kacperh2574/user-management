@@ -2,6 +2,7 @@ package com.user.userservice.service;
 
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
+import com.user.userservice.exception.UserNotFoundException;
 import com.user.userservice.grpc.BillingServiceGrpcClient;
 import com.user.userservice.kafka.KafkaProducer;
 import com.user.userservice.mapper.UserMapper;
@@ -20,6 +21,7 @@ import java.util.UUID;
 
 import static com.user.userservice.util.TestDataUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -66,6 +68,24 @@ public class UserServiceTest {
     }
 
     @Test
+    void getUser_returnsUser_whenUserExists() {
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
+        UserResponseDTO userResponse = userService.getUser(id);
+
+        assertThat(userResponse)
+                .usingRecursiveComparison()
+                .isEqualTo(UserMapper.toDTO(user));
+    }
+
+    @Test
+    void getUser_throwsException_whenUserDoesNotExist() {
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.getUser(id));
+    }
+
+    @Test
     void getUsers_returnsAllUsers() {
         List<User> users = List.of(createUserA(), createUserB());
         when(userRepository.findAll()).thenReturn(users);
@@ -78,7 +98,7 @@ public class UserServiceTest {
     }
 
     @Test
-    void updateUser_returnsUpdatedUser() {
+    void updateUser_returnsUpdatedUser_whenUserExists() {
         when(userRepository.findById(id)).thenReturn(Optional.of(user));
         when(userRepository.save(any(User.class))).thenReturn(user);
 
@@ -90,9 +110,23 @@ public class UserServiceTest {
     }
 
     @Test
-    void deleteUser_deletesUserById() {
+    void updateUser_throwsException_whenUserDoesNotExist() {
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(UserNotFoundException.class, () -> userService.updateUser(id, userRequestDTO));
+    }
+
+    @Test
+    void deleteUser_deletesUser_whenUserExists() {
+        when(userRepository.findById(id)).thenReturn(Optional.of(user));
+
         userService.deleteUser(id);
 
         verify(userRepository, times(1)).deleteById(id);
+    }
+
+    @Test
+    void deleteUser_throwsException_whenUserDoesNotExist() {
+        assertThrows(UserNotFoundException.class, () -> userService.deleteUser(id));
     }
 }

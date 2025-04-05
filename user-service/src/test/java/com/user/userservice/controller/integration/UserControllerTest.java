@@ -44,19 +44,6 @@ public class UserControllerTest {
     }
 
     @Test
-    void getUsers() {
-        User user = createUserWithoutId();
-
-        userRepository.save(user);
-
-        ResponseEntity<UserResponseDTO[]> response = restTemplate.getForEntity("/users", UserResponseDTO[].class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).hasSize(1);
-        assertThat(response.getBody()[0].getName()).isEqualTo("User");
-    }
-
-    @Test
     void createUser() {
         when(billingServiceGrpcClient.createBillingAccount(any(), any(), any()))
                 .thenReturn(BillingResponse.newBuilder().build());
@@ -69,6 +56,32 @@ public class UserControllerTest {
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody().getName()).isEqualTo(userRequestDTO.getName());
+    }
+
+    @Test
+    void getUser() {
+        User user = createUserWithoutId();
+
+        userRepository.save(user);
+
+        ResponseEntity<UserResponseDTO> response = restTemplate.getForEntity("/users/" + user.getId(), UserResponseDTO.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getName()).isEqualTo("User");
+    }
+
+    @Test
+    void getUsers() {
+        User user = createUserWithoutId();
+
+        userRepository.save(user);
+
+        ResponseEntity<UserResponseDTO[]> response = restTemplate.getForEntity("/users", UserResponseDTO[].class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).hasSize(1);
+        assertThat(response.getBody()[0].getName()).isEqualTo("User");
     }
 
     @Test
