@@ -62,3 +62,7 @@ protobuf {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
+
+tasks.getByName<org.springframework.boot.gradle.tasks.bundling.BootJar>("bootJar") {
+    archiveFileName.set("user-service-0.0.1-SNAPSHOT.jar")
+}
