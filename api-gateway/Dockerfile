@@ -1,20 +1,18 @@
-FROM maven:3.9.9-amazoncorretto-21 AS builder
+FROM gradle:8.10.0-jdk21 AS builder
 
 WORKDIR /app
 
-COPY pom.xml .
+COPY . .
 
-RUN mvn dependency:go-offline -B
+RUN chmod +x ./gradlew
 
-COPY src ./src
-
-RUN mvn clean package -DskipTests
+RUN ./gradlew clean build -x test
 
 FROM amazoncorretto:21
 
 WORKDIR /app
 
-COPY --from=builder ./app/target/api-gateway-0.0.1-SNAPSHOT.jar ./app.jar
+COPY --from=builder /app/build/libs/api-gateway-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 4004
 
