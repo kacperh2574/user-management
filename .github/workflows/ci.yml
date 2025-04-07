@@ -22,16 +22,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: maven
+          cache: gradle
 
-      - name: 🛠 Set executable permissions
-        run: find . -type f -name "mvnw" -exec chmod +x {} +
+      - name: ⚙️ Set executable permissions
+        run: find . -type f -name "gradlew" -exec chmod +x {} +
 
       - name: 🛠 Build all microservices
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
             echo "Building $service..."
-            (cd $service && ./mvnw clean package -DskipTests)
+            (cd $service && ./gradlew build -x test)
           done
 
   test:
@@ -46,22 +46,22 @@ jobs:
         with:
           java-version: '21'
           distribution: 'corretto'
-          cache: maven
+          cache: gradle
 
-      - name: 🚀 Start services with docker-compose
+      - name: 🚀 Start services with docker compose
         run: docker compose up -d --build
 
       - name: ⏳ Wait for services to be ready
         run: sleep 30
 
-      - name: 🛠 Set executable permissions
-        run: find . -type f -name "mvnw" -exec chmod +x {} +
+      - name: ⚙️ Set executable permissions
+        run: find . -type f -name "gradlew" -exec chmod +x {} +
 
       - name: 🔥 Run tests
         run: |
           for service in user-service billing-service analytics-service auth-service api-gateway; do
             echo "Running tests for $service..."
-            (cd $service && ./mvnw verify)
+            (cd $service && ./gradlew test)
           done
 
       - name: 🛑 Stop and clean up services
