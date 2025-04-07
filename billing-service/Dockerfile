@@ -1,20 +1,18 @@
-FROM maven:3.9.9-amazoncorretto-21 AS builder
+FROM gradle:8.10.0-jdk21 AS builder
 
 WORKDIR /app
 
-COPY pom.xml .
+COPY . .
 
-RUN mvn dependency:go-offline -B
+RUN chmod +x ./gradlew
 
-COPY src ./src
-
-RUN mvn clean package
+RUN ./gradlew clean build -x test
 
 FROM amazoncorretto:21
 
 WORKDIR /app
 
-COPY --from=builder ./app/target/billing-service-0.0.1-SNAPSHOT.jar ./app.jar
+COPY --from=builder /app/build/libs/billing-service-0.0.1-SNAPSHOT.jar app.jar
 
 EXPOSE 4001
 EXPOSE 9001
