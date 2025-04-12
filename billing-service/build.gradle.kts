@@ -20,6 +20,7 @@ repositories {
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 
     implementation("io.grpc:grpc-netty-shaded:1.69.0")
     implementation("io.grpc:grpc-protobuf:1.69.0")
@@ -27,7 +28,12 @@ dependencies {
     implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
     implementation("com.google.protobuf:protobuf-java:4.29.1")
 
+    runtimeOnly("org.postgresql:postgresql")
+    runtimeOnly("org.springframework.boot:spring-boot-devtools")
+
     compileOnly("javax.annotation:javax.annotation-api:1.3.2")
+    compileOnly("org.projectlombok:lombok:1.18.36")
+    annotationProcessor("org.projectlombok:lombok:1.18.36")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
