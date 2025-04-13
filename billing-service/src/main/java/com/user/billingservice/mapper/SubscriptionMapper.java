@@ -6,6 +6,7 @@ import com.user.billingservice.model.Subscription;
 import com.user.billingservice.model.SubscriptionStatus;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 public class SubscriptionMapper {
 
@@ -19,8 +20,9 @@ public class SubscriptionMapper {
                 .build();
     }
 
-    public static Subscription toModel(SubscriptionRequestDTO subscriptionRequestDTO) {
+    public static Subscription toModel(UUID userID, SubscriptionRequestDTO subscriptionRequestDTO) {
         return Subscription.builder()
+                .userId(userID)
                 .plan(subscriptionRequestDTO.getPlanType())
                 .startDate(LocalDate.now())
                 .status(SubscriptionStatus.ACTIVE)

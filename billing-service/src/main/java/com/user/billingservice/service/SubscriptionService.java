@@ -20,8 +20,8 @@ public class SubscriptionService {
         this.subscriptionRepository = subscriptionRepository;
     }
 
-    public SubscriptionResponseDTO createSubscription(SubscriptionRequestDTO subscriptionRequestDTO) {
-        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(subscriptionRequestDTO));
+    public SubscriptionResponseDTO createSubscription(UUID userId, SubscriptionRequestDTO subscriptionRequestDTO) {
+        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(userId, subscriptionRequestDTO));
 
         return SubscriptionMapper.toDTO(newSubscription);
     }

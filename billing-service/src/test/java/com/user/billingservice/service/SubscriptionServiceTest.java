@@ -55,7 +55,7 @@ class SubscriptionServiceTest {
     void createSubscription_returnsCreatedSubscription() {
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
 
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(subscriptionRequestDTO);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId, subscriptionRequestDTO);
 
         assertThat(subscriptionResponse)
                 .usingRecursiveComparison()
