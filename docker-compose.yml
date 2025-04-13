@@ -48,6 +48,8 @@ services:
       - "4001:4001"
     networks:
       - internal
+    depends_on:
+      - billing-service-db
     environment:
       - SPRING_DATASOURCE_USERNAME=admin_user
       - SPRING_DATASOURCE_PASSWORD=password
