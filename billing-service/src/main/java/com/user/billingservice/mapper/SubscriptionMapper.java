@@ -25,6 +25,7 @@ public class SubscriptionMapper {
                 .userId(userID)
                 .plan(subscriptionRequestDTO.getPlanType())
                 .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusMonths(1))
                 .status(SubscriptionStatus.ACTIVE)
                 .build();
     }
