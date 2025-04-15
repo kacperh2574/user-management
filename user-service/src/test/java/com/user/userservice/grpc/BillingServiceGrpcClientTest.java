@@ -22,21 +22,21 @@ public class BillingServiceGrpcClientTest {
     }
 
     @Test
-    void createBillingAccount() {
+    void createSubscription() {
         BillingResponse expectedResponse = BillingResponse.newBuilder()
-                .setAccountId("12345")
-                .setStatus("Active")
+                .setSubscriptionId("12345")
+                .setStatus("ACTIVE")
                 .build();
 
-        when(blockingStub.createBillingAccount(any(BillingRequest.class)))
+        when(blockingStub.createSubscription(any(BillingRequest.class)))
                 .thenReturn(expectedResponse);
 
         BillingResponse actualResponse = billingServiceGrpcClient
-                .createBillingAccount("user ID", "name", "email@example.com");
+                .createSubscription("user ID", "name", "email@example.com");
 
         assertEquals(expectedResponse, actualResponse);
 
         verify(blockingStub, times(1))
-                .createBillingAccount(any(BillingRequest.class));
+                .createSubscription(any(BillingRequest.class));
     }
 }

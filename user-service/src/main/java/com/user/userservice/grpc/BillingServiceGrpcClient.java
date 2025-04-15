@@ -18,14 +18,15 @@ public class BillingServiceGrpcClient {
         this.blockingStub = blockingStub;
     }
 
-    public BillingResponse createBillingAccount(String userId, String name, String email) {
+    public BillingResponse createSubscription(String userId, String name, String email) {
         BillingRequest request = BillingRequest.newBuilder()
                 .setUserId(userId)
                 .setName(name)
                 .setEmail(email)
+                .setPlanType("FREE")
                 .build();
 
-        BillingResponse response = blockingStub.createBillingAccount(request);
+        BillingResponse response = blockingStub.createSubscription(request);
 
         log.info("Received response from Billing Service gRPC: {}", response);
 

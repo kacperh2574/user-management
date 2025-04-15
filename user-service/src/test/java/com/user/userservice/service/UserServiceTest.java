@@ -62,7 +62,7 @@ public class UserServiceTest {
                 .isEqualTo(UserMapper.toDTO(user));
 
         verify(billingServiceGrpcClient, times(1))
-                .createBillingAccount(user.getId().toString(), user.getName(), user.getEmail());
+                .createSubscription(user.getId().toString(), user.getName(), user.getEmail());
         verify(kafkaProducer, times(1))
                 .sendEvent(user);
     }

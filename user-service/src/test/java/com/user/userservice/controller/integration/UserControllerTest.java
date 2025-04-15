@@ -45,7 +45,7 @@ public class UserControllerTest {
 
     @Test
     void createUser() {
-        when(billingServiceGrpcClient.createBillingAccount(any(), any(), any()))
+        when(billingServiceGrpcClient.createSubscription(any(), any(), any()))
                 .thenReturn(BillingResponse.newBuilder().build());
         doNothing().when(kafkaProducer).sendEvent(any());
 

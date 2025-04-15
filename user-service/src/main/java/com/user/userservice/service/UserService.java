@@ -33,7 +33,7 @@ public class UserService {
 
         User newUser = userRepository.save(UserMapper.toModel(userRequestDTO));
 
-        billingServiceGrpcClient.createBillingAccount(
+        billingServiceGrpcClient.createSubscription(
                 newUser.getId().toString(), newUser.getName(), newUser.getEmail()
         );
 

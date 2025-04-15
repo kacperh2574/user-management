@@ -4,16 +4,17 @@ option java_multiple_files = true;
 option java_package = "billing";
 
 service BillingService {
-  rpc CreateBillingAccount (BillingRequest) returns (BillingResponse);
+  rpc CreateSubscription (BillingRequest) returns (BillingResponse);
 }
 
 message BillingRequest {
   string userId = 1;
   string name = 2;
   string email = 3;
+  string planType = 4;
 }
 
 message BillingResponse {
-  string accountId = 1;
+  string subscriptionId = 1;
   string status = 2;
 }
