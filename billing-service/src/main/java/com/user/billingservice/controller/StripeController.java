@@ -1,5 +1,6 @@
 package com.user.billingservice.controller;
 
+import com.stripe.exception.StripeException;
 import com.user.billingservice.service.StripeService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +24,7 @@ public class StripeController {
             String sessionUrl = stripeService.createCheckoutSession(userId);
 
             return ResponseEntity.ok(sessionUrl);
-        } catch (Exception e) {
+        } catch (StripeException e) {
             return ResponseEntity.internalServerError().body("Error creating Stripe checkout session");
         }
     }

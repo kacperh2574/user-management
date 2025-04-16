@@ -1,5 +1,6 @@
 package com.user.billingservice.controller.integration;
 
+import com.stripe.exception.ApiException;
 import com.stripe.exception.StripeException;
 import com.user.billingservice.service.StripeService;
 import org.junit.jupiter.api.Test;
@@ -22,18 +23,28 @@ public class StripeControllerTest {
     @MockitoBean
     StripeService stripeService;
 
+    String userId = "user-id";
+    String pathWithUserIdParam = "/payments/create-checkout-session?userId=" + userId;
+
     @Test
-    void createCheckoutSession() throws StripeException {
-        String userId = "user-id";
+    void returnsOk_whenCheckoutSessionCreated() throws StripeException {
         String sessionUrl = "http://stripe-checkout-session.com";
 
         when(stripeService.createCheckoutSession(userId)).thenReturn(sessionUrl);
 
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "/payments/create-checkout-session?userId=" + userId, null, String.class
-        );
+        ResponseEntity<String> response = restTemplate.postForEntity(pathWithUserIdParam, null, String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).isEqualTo(sessionUrl);
+    }
+
+    @Test
+    void returnsInternalServerError_whenFailedToCreateCheckoutSession() throws StripeException {
+        when(stripeService.createCheckoutSession(userId)).thenThrow(ApiException.class);
+
+        ResponseEntity<String> response = restTemplate.postForEntity(pathWithUserIdParam, null, String.class);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        assertThat(response.getBody()).isEqualTo("Error creating Stripe checkout session");
     }
 }
