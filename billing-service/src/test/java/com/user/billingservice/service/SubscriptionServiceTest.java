@@ -11,6 +11,7 @@ import com.user.billingservice.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -21,6 +22,7 @@ import java.util.UUID;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -90,5 +92,29 @@ class SubscriptionServiceTest {
         assertThat(subscriptionsResponse)
                 .usingRecursiveComparison()
                 .isEqualTo(subscriptions.stream().map(SubscriptionMapper::toDTO).toList());
+    }
+
+    @Test
+    void upgradeToProSubscription_returnsSubscriptionWithUpgradedPlan() {
+        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
+        subscription.setPlan(PlanType.PRO);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
+
+        subscriptionService.upgradeSubscriptionToPRO(userId);
+
+        ArgumentCaptor<Subscription> captor = ArgumentCaptor.forClass(Subscription.class);
+
+        verify(subscriptionRepository).save(captor.capture());
+
+        Subscription savedSubscription = captor.getValue();
+
+        assertEquals(PlanType.PRO, savedSubscription.getPlan());
+    }
+
+    @Test
+    void upgradeToProSubscription_throwsException_whenSubscriptionDoesNotExist() {
+        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.empty());
+
+        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.upgradeSubscriptionToPRO(userId));
     }
 }
