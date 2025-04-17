@@ -4,10 +4,13 @@ import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
+import com.user.billingservice.model.PlanType;
 import com.user.billingservice.model.Subscription;
+import com.user.billingservice.model.SubscriptionStatus;
 import com.user.billingservice.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +41,19 @@ public class SubscriptionService {
                 .stream()
                 .map(SubscriptionMapper::toDTO)
                 .toList();
+    }
+
+    public void upgradeSubscriptionToPRO(UUID userId) {
+        Subscription subscription = findSubscriptionByUserId(userId);
+
+        subscription.toBuilder()
+                .plan(PlanType.PRO)
+                .status(SubscriptionStatus.ACTIVE)
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusMonths(1))
+                .build();
+
+        subscriptionRepository.save(subscription);
     }
 
     private Subscription findSubscriptionByUserId(UUID userId) {

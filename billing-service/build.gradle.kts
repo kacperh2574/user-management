@@ -28,6 +28,7 @@ dependencies {
     implementation("io.grpc:grpc-stub:1.69.0")
     implementation("net.devh:grpc-spring-boot-starter:3.1.0.RELEASE")
     implementation("com.google.protobuf:protobuf-java:4.29.1")
+    implementation("com.stripe:stripe-java:29.0.0")
 
     runtimeOnly("org.postgresql:postgresql")
     runtimeOnly("org.springframework.boot:spring-boot-devtools")
