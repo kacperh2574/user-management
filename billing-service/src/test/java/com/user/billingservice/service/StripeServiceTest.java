@@ -2,7 +2,7 @@ package com.user.billingservice.service;
 
 import com.stripe.model.checkout.Session;
 import com.user.billingservice.config.StripeConfig;
-import com.user.billingservice.integration.stripe.StripeClient;
+import com.user.billingservice.integration.stripe.StripeSessionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +20,7 @@ class StripeServiceTest {
     private StripeConfig stripeConfig;
 
     @Mock
-    private StripeClient stripeClient;
+    private StripeSessionHandler stripeClient;
 
     @InjectMocks
     private StripeService stripeService;

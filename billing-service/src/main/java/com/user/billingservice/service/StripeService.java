@@ -4,7 +4,7 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import com.user.billingservice.config.StripeConfig;
-import com.user.billingservice.integration.stripe.StripeClient;
+import com.user.billingservice.integration.stripe.StripeSessionHandler;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,11 +13,11 @@ import java.util.List;
 public class StripeService {
 
     private final StripeConfig stripeConfig;
-    private final StripeClient stripeClient;
+    private final StripeSessionHandler stripeSessionHandler;
 
-    public StripeService(StripeConfig stripeConfig, StripeClient stripeClient) {
+    public StripeService(StripeConfig stripeConfig, StripeSessionHandler stripeClient) {
         this.stripeConfig = stripeConfig;
-        this.stripeClient = stripeClient;
+        this.stripeSessionHandler = stripeClient;
     }
 
     public String createCheckoutSession(String userId) throws StripeException {
@@ -34,7 +34,7 @@ public class StripeService {
                 .putMetadata("userId", userId)
                 .build();
 
-        Session session = stripeClient.createSession(params);
+        Session session = stripeSessionHandler.createSession(params);
 
         return session.getUrl();
     }

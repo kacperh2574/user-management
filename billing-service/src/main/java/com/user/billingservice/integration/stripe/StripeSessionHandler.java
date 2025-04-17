@@ -6,7 +6,7 @@ import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StripeClient {
+public class StripeSessionHandler {
 
     public Session createSession(SessionCreateParams params) throws StripeException {
         return Session.create(params);
