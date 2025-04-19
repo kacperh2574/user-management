@@ -56,6 +56,19 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
+    public void downgradeExpiredProSubscriptions() {
+        List<Subscription> expired = subscriptionRepository.findAllByEndDateBeforeAndPlanNot(LocalDate.now(), PlanType.FREE);
+
+        expired.forEach(subscription -> {
+            Subscription downgraded = subscription.toBuilder()
+                    .plan(PlanType.FREE)
+                    .endDate(null)
+                    .build();
+
+            subscriptionRepository.save(downgraded);
+        });
+    }
+
     private Subscription findSubscriptionByUserId(UUID userId) {
         return subscriptionRepository
                 .findByUserId(userId)
