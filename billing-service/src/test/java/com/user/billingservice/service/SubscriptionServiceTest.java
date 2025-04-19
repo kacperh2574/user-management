@@ -117,4 +117,28 @@ class SubscriptionServiceTest {
 
         assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.upgradeSubscriptionToPRO(userId));
     }
+
+    @Test
+    void downgradeExpiredProSubscriptions_savesSubscriptionsWithDowngradedPlan() {
+        Subscription expiredPro = Subscription.builder()
+                .id(UUID.randomUUID())
+                .userId(UUID.randomUUID())
+                .plan(PlanType.PRO)
+                .status(SubscriptionStatus.ACTIVE)
+                .endDate(LocalDate.now().minusDays(1))
+                .startDate(LocalDate.now().minusMonths(1))
+                .build();
+
+        when(subscriptionRepository.findAllByEndDateBeforeAndPlanNot(LocalDate.now(), PlanType.FREE))
+                .thenReturn(List.of(expiredPro));
+
+        subscriptionService.downgradeExpiredProSubscriptions();
+
+        ArgumentCaptor<Subscription> captor = ArgumentCaptor.forClass(Subscription.class);
+        verify(subscriptionRepository).save(captor.capture());
+        Subscription saved = captor.getValue();
+
+        assertThat(saved.getPlan()).isEqualTo(PlanType.FREE);
+        assertThat(saved.getEndDate()).isNull();
+    }
 }
