@@ -1,13 +1,36 @@
 package com.user.billingservice.util;
 
 import com.stripe.model.checkout.Session;
+import com.user.billingservice.dto.SubscriptionRequestDTO;
+import com.user.billingservice.model.PlanType;
+import com.user.billingservice.model.Subscription;
+import com.user.billingservice.model.SubscriptionStatus;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDate;
 import java.util.Map;
+import java.util.UUID;
 
 public class TestDataUtil {
+
+    public static Subscription createSubscription(UUID subscriptionId, UUID userId, PlanType plan) {
+        return Subscription.builder()
+                .id(subscriptionId)
+                .userId(userId)
+                .plan(plan)
+                .status(SubscriptionStatus.ACTIVE)
+                .startDate(LocalDate.now().minusMonths(2))
+                .endDate(LocalDate.now().minusMonths(1))
+                .build();
+    }
+
+    public static SubscriptionRequestDTO createSubscriptionRequestDTO() {
+        return SubscriptionRequestDTO.builder()
+                .planType(PlanType.PRO)
+                .build();
+    }
 
     public static Session createSession(final String userId) {
         Session session = new Session();

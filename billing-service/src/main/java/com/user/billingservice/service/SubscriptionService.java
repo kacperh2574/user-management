@@ -11,6 +11,7 @@ import com.user.billingservice.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,9 +57,31 @@ public class SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
+    public List<String> downgradeExpiredProSubscriptions() {
+        List<Subscription> expired = findSubscriptionsByEndDateAndPlan(LocalDate.now(), PlanType.PRO);
+
+        List<String> expiredIds = new ArrayList<>();
+
+        expired.forEach(subscription -> {
+            Subscription downgraded = subscription.toBuilder()
+                    .plan(PlanType.FREE)
+                    .endDate(null)
+                    .build();
+
+            subscriptionRepository.save(downgraded);
+            expiredIds.add(downgraded.getId().toString());
+        });
+
+        return expiredIds;
+    }
+
     private Subscription findSubscriptionByUserId(UUID userId) {
         return subscriptionRepository
                 .findByUserId(userId)
                 .orElseThrow(() -> new SubscriptionNotFoundException("A subscription for a user with this ID not found: " + userId));
+    }
+
+    private List<Subscription> findSubscriptionsByEndDateAndPlan(LocalDate endDate, PlanType plan) {
+        return subscriptionRepository.findAllByEndDateBeforeAndPlan(endDate, plan);
     }
 }
