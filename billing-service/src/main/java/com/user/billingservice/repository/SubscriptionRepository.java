@@ -11,5 +11,5 @@ import java.util.UUID;
 
 public interface SubscriptionRepository extends JpaRepository<Subscription, UUID> {
     Optional<Subscription> findByUserId(UUID userId);
-    List<Subscription> findAllByEndDateBeforeAndPlanNot(LocalDate date, PlanType type);
+    List<Subscription> findAllByEndDateBeforeAndPlan(LocalDate date, PlanType type);
 }

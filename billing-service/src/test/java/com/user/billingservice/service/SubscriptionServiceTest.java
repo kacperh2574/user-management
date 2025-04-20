@@ -6,7 +6,6 @@ import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
 import com.user.billingservice.model.PlanType;
 import com.user.billingservice.model.Subscription;
-import com.user.billingservice.model.SubscriptionStatus;
 import com.user.billingservice.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +20,8 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
+import static com.user.billingservice.util.TestDataUtil.createSubscription;
+import static com.user.billingservice.util.TestDataUtil.createSubscriptionRequestDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,17 +37,10 @@ class SubscriptionServiceTest {
     @InjectMocks
     SubscriptionService subscriptionService;
 
-    UUID subscriptionId = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
     UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
-    Subscription subscription = Subscription.builder()
-            .id(subscriptionId)
-            .userId(userId)
-            .plan(PlanType.FREE)
-            .status(SubscriptionStatus.ACTIVE)
-            .startDate(LocalDate.now()).build();
-    SubscriptionRequestDTO subscriptionRequestDTO = SubscriptionRequestDTO.builder()
-            .planType(PlanType.FREE)
-            .build();
+
+    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+    SubscriptionRequestDTO subscriptionRequestDTO = createSubscriptionRequestDTO();
 
     @BeforeEach
     void setUp() {
@@ -119,26 +113,20 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    void downgradeExpiredProSubscriptions_savesSubscriptionsWithDowngradedPlan() {
-        Subscription expiredPro = Subscription.builder()
-                .id(UUID.randomUUID())
-                .userId(UUID.randomUUID())
-                .plan(PlanType.PRO)
-                .status(SubscriptionStatus.ACTIVE)
-                .endDate(LocalDate.now().minusDays(1))
-                .startDate(LocalDate.now().minusMonths(1))
-                .build();
+    void downgradeExpiredProSubscriptions_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
+        when(subscriptionRepository.findAllByEndDateBeforeAndPlan(LocalDate.now(), PlanType.PRO))
+                .thenReturn(List.of(subscription));
 
-        when(subscriptionRepository.findAllByEndDateBeforeAndPlanNot(LocalDate.now(), PlanType.FREE))
-                .thenReturn(List.of(expiredPro));
+        List<String> downgradedIds = subscriptionService.downgradeExpiredProSubscriptions();
 
-        subscriptionService.downgradeExpiredProSubscriptions();
+        assertEquals(1, downgradedIds.size());
+        assertEquals(subscription.getId().toString(), downgradedIds.getFirst());
 
         ArgumentCaptor<Subscription> captor = ArgumentCaptor.forClass(Subscription.class);
         verify(subscriptionRepository).save(captor.capture());
-        Subscription saved = captor.getValue();
 
-        assertThat(saved.getPlan()).isEqualTo(PlanType.FREE);
-        assertThat(saved.getEndDate()).isNull();
+        Subscription savedSubscription = captor.getValue();
+        assertThat(savedSubscription.getPlan()).isEqualTo(PlanType.FREE);
+        assertThat(savedSubscription.getEndDate()).isNull();
     }
 }
