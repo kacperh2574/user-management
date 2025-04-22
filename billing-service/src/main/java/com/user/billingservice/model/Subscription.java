@@ -27,17 +27,11 @@ public class Subscription {
     @NotNull
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PlanType plan;
+    private PlanType planType;
 
-    @NotNull
-    @Enumerated(EnumType.STRING)
+    @Embedded
+    private ProDetails proDetails;
+
     @Column(nullable = false)
-    private SubscriptionStatus status;
-
-    @NotNull
-    @Column(nullable = false)
-    private LocalDate startDate;
-
-    @NotNull
-    private LocalDate endDate;
+    private LocalDate createdAt;
 }
