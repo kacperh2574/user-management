@@ -1,6 +1,5 @@
 package com.user.billingservice.service;
 
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
@@ -22,7 +21,6 @@ import java.util.UUID;
 import java.util.List;
 
 import static com.user.billingservice.util.TestDataUtil.createSubscription;
-import static com.user.billingservice.util.TestDataUtil.createSubscriptionRequestDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -40,8 +38,7 @@ class SubscriptionServiceTest {
 
     UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
 
-    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO, false);
-    SubscriptionRequestDTO subscriptionRequestDTO = createSubscriptionRequestDTO();
+    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
 
     @BeforeEach
     void setUp() {
@@ -52,7 +49,7 @@ class SubscriptionServiceTest {
     void createSubscription_returnsCreatedSubscription() {
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
 
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId, subscriptionRequestDTO);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
 
         assertThat(subscriptionResponse)
                 .usingRecursiveComparison()
@@ -91,18 +88,15 @@ class SubscriptionServiceTest {
 
     @Test
     void upgradeToProSubscription_returnsSubscriptionWithUpgradedPlan() {
+        Subscription proSubscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+
         when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
-        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(proSubscription);
 
-        subscriptionService.upgradeSubscriptionToPRO(userId);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.upgradeSubscriptionToPRO(userId);
 
-        ArgumentCaptor<Subscription> captor = ArgumentCaptor.forClass(Subscription.class);
-
-        verify(subscriptionRepository).save(captor.capture());
-
-        Subscription savedSubscription = captor.getValue();
-
-        assertEquals(PlanType.PRO, savedSubscription.getPlanType());
+        assertEquals(PlanType.PRO, subscriptionResponse.getPlanType());
+        assertEquals(Status.ACTIVE, subscriptionResponse.getProDetails().getStatus());
     }
 
     @Test
@@ -113,22 +107,22 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    void downgradeExpiredProSubscriptions_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
-        Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO, true);
+    void downgradeExpiredProSubscriptionIds_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
+        Subscription expiredSubscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
 
         when(subscriptionRepository.findAllByProDetails_EndDateBeforeAndPlanType(LocalDate.now(), PlanType.PRO))
-                .thenReturn(List.of(subscription));
+                .thenReturn(List.of(expiredSubscription));
 
         List<String> downgradedIds = subscriptionService.downgradeExpiredProSubscriptions();
 
         assertEquals(1, downgradedIds.size());
-        assertEquals(subscription.getId().toString(), downgradedIds.getFirst());
+        assertEquals(expiredSubscription.getId().toString(), downgradedIds.getFirst());
 
         ArgumentCaptor<Subscription> captor = ArgumentCaptor.forClass(Subscription.class);
         verify(subscriptionRepository).save(captor.capture());
 
-        Subscription savedSubscription = captor.getValue();
-        assertThat(savedSubscription.getPlanType()).isEqualTo(PlanType.FREE);
-        assertThat(savedSubscription.getProDetails().getStatus()).isEqualTo(Status.EXPIRED);
+        Subscription downgradedSubscription = captor.getValue();
+        assertThat(downgradedSubscription.getPlanType()).isEqualTo(PlanType.FREE);
+        assertThat(downgradedSubscription.getProDetails().getStatus()).isEqualTo(Status.EXPIRED);
     }
 }

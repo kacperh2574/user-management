@@ -3,7 +3,6 @@ package com.user.billingservice.grpc;
 import billing.BillingRequest;
 import billing.BillingResponse;
 import billing.BillingServiceGrpc.BillingServiceImplBase;
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.service.SubscriptionService;
 import io.grpc.stub.StreamObserver;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 import static com.user.billingservice.mapper.BillingGrpcMapper.toBillingResponse;
-import static com.user.billingservice.mapper.BillingGrpcMapper.toSubscriptionRequestDTO;
 
 @GrpcService
 public class BillingGrpcService extends BillingServiceImplBase {
@@ -31,10 +29,8 @@ public class BillingGrpcService extends BillingServiceImplBase {
     public void createSubscription(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
         log.info("Received createSubscription request: {}", request);
 
-        SubscriptionRequestDTO subscriptionRequest = toSubscriptionRequestDTO(request);
-
         UUID userId = UUID.fromString(request.getUserId());
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId, subscriptionRequest);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
 
         BillingResponse response = toBillingResponse(subscriptionResponse);
 

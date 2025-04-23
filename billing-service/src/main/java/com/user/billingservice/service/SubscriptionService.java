@@ -1,6 +1,5 @@
 package com.user.billingservice.service;
 
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
@@ -25,8 +24,8 @@ public class SubscriptionService {
         this.subscriptionRepository = subscriptionRepository;
     }
 
-    public SubscriptionResponseDTO createSubscription(UUID userId, SubscriptionRequestDTO subscriptionRequestDTO) {
-        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(userId, subscriptionRequestDTO));
+    public SubscriptionResponseDTO createSubscription(UUID userId) {
+        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(userId));
 
         return SubscriptionMapper.toDTO(newSubscription);
     }
@@ -45,7 +44,7 @@ public class SubscriptionService {
                 .toList();
     }
 
-    public void upgradeSubscriptionToPRO(UUID userId) {
+    public SubscriptionResponseDTO upgradeSubscriptionToPRO(UUID userId) {
         Subscription subscription = findSubscriptionByUserId(userId);
 
         subscription.toBuilder()
@@ -58,6 +57,8 @@ public class SubscriptionService {
                 .build();
 
         subscriptionRepository.save(subscription);
+
+        return SubscriptionMapper.toDTO(subscription);
     }
 
     public List<String> downgradeExpiredProSubscriptions() {
@@ -74,6 +75,7 @@ public class SubscriptionService {
                     .build();
 
             subscriptionRepository.save(downgraded);
+
             expiredIds.add(downgraded.getId().toString());
         });
 

@@ -1,8 +1,8 @@
 package com.user.billingservice.mapper;
 
 import com.user.billingservice.dto.ProDetailsDTO;
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
+import com.user.billingservice.model.PlanType;
 import com.user.billingservice.model.ProDetails;
 import com.user.billingservice.model.Subscription;
 
@@ -20,10 +20,10 @@ public class SubscriptionMapper {
                 .build();
     }
 
-    public static Subscription toModel(UUID userId, SubscriptionRequestDTO subscriptionRequestDTO) {
+    public static Subscription toModel(UUID userId) {
         return Subscription.builder()
                 .userId(userId)
-                .planType(subscriptionRequestDTO.getPlanType())
+                .planType(PlanType.FREE)
                 .createdAt(LocalDate.now())
                 .proDetails(null)
                 .build();

@@ -2,7 +2,6 @@ package com.user.billingservice.grpc;
 
 import billing.BillingRequest;
 import billing.BillingResponse;
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.model.PlanType;
 import com.user.billingservice.service.SubscriptionService;
@@ -11,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -42,11 +42,12 @@ public class BillingGrpcServiceTest {
 
         SubscriptionResponseDTO responseDTO = SubscriptionResponseDTO.builder()
                 .id(subscriptionId.toString())
-                .proDetails(null)
                 .planType(PlanType.FREE)
+                .proDetails(null)
+                .createdAt(LocalDate.now())
                 .build();
 
-        when(subscriptionService.createSubscription(eq(userId), any(SubscriptionRequestDTO.class)))
+        when(subscriptionService.createSubscription(eq(userId)))
                 .thenReturn(responseDTO);
 
         billingGrpcService.createSubscription(request, responseObserver);
@@ -59,6 +60,6 @@ public class BillingGrpcServiceTest {
         BillingResponse response = captor.getValue();
 
         assertEquals(subscriptionId.toString(), response.getSubscriptionId());
-        assertEquals("FREE", response.getPlanType());
+        assertEquals(PlanType.FREE.toString(), response.getPlanType());
     }
 }
