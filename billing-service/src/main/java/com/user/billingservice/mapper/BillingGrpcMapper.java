@@ -10,14 +10,14 @@ public class BillingGrpcMapper {
 
     public static SubscriptionRequestDTO toSubscriptionRequestDTO(BillingRequest request) {
         return SubscriptionRequestDTO.builder()
-                .planType(PlanType.valueOf(request.getPlanType()))
+                .planType(PlanType.FREE)
                 .build();
     }
 
     public static BillingResponse toBillingResponse(SubscriptionResponseDTO subscriptionResponseDTO) {
         return BillingResponse.newBuilder()
                 .setSubscriptionId(subscriptionResponseDTO.getId())
-                .setStatus(subscriptionResponseDTO.getStatus().toString())
+                .setPlanType(PlanType.FREE.toString())
                 .build();
     }
 }

@@ -5,7 +5,6 @@ import billing.BillingResponse;
 import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.model.PlanType;
-import com.user.billingservice.model.SubscriptionStatus;
 import com.user.billingservice.service.SubscriptionService;
 import io.grpc.stub.StreamObserver;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,13 +38,12 @@ public class BillingGrpcServiceTest {
                 .setUserId(userId.toString())
                 .setName("Name")
                 .setEmail("test@email.com")
-                .setPlanType("FREE")
                 .build();
 
         SubscriptionResponseDTO responseDTO = SubscriptionResponseDTO.builder()
                 .id(subscriptionId.toString())
-                .status(SubscriptionStatus.ACTIVE)
-                .plan(PlanType.FREE)
+                .proDetails(null)
+                .planType(PlanType.FREE)
                 .build();
 
         when(subscriptionService.createSubscription(eq(userId), any(SubscriptionRequestDTO.class)))
@@ -61,6 +59,6 @@ public class BillingGrpcServiceTest {
         BillingResponse response = captor.getValue();
 
         assertEquals(subscriptionId.toString(), response.getSubscriptionId());
-        assertEquals("ACTIVE", response.getStatus());
+        assertEquals("FREE", response.getPlanType());
     }
 }
