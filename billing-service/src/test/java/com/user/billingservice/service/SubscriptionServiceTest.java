@@ -5,6 +5,7 @@ import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
 import com.user.billingservice.model.PlanType;
+import com.user.billingservice.model.Status;
 import com.user.billingservice.model.Subscription;
 import com.user.billingservice.repository.SubscriptionRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +40,7 @@ class SubscriptionServiceTest {
 
     UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
 
-    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO, false);
     SubscriptionRequestDTO subscriptionRequestDTO = createSubscriptionRequestDTO();
 
     @BeforeEach
@@ -91,7 +92,6 @@ class SubscriptionServiceTest {
     @Test
     void upgradeToProSubscription_returnsSubscriptionWithUpgradedPlan() {
         when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
-        subscription.setPlan(PlanType.PRO);
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
 
         subscriptionService.upgradeSubscriptionToPRO(userId);
@@ -102,7 +102,7 @@ class SubscriptionServiceTest {
 
         Subscription savedSubscription = captor.getValue();
 
-        assertEquals(PlanType.PRO, savedSubscription.getPlan());
+        assertEquals(PlanType.PRO, savedSubscription.getPlanType());
     }
 
     @Test
@@ -114,6 +114,8 @@ class SubscriptionServiceTest {
 
     @Test
     void downgradeExpiredProSubscriptions_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
+        Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO, true);
+
         when(subscriptionRepository.findAllByEndDateBeforeAndPlan(LocalDate.now(), PlanType.PRO))
                 .thenReturn(List.of(subscription));
 
@@ -126,7 +128,7 @@ class SubscriptionServiceTest {
         verify(subscriptionRepository).save(captor.capture());
 
         Subscription savedSubscription = captor.getValue();
-        assertThat(savedSubscription.getPlan()).isEqualTo(PlanType.FREE);
-        assertThat(savedSubscription.getEndDate()).isNull();
+        assertThat(savedSubscription.getPlanType()).isEqualTo(PlanType.FREE);
+        assertThat(savedSubscription.getProDetails().getStatus()).isEqualTo(Status.EXPIRED);
     }
 }
