@@ -1,7 +1,6 @@
 package com.user.billingservice.dto;
 
 import com.user.billingservice.model.PlanType;
-import com.user.billingservice.model.SubscriptionStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,8 +13,7 @@ import java.time.LocalDate;
 public class SubscriptionResponseDTO {
 
     private String id;
-    private PlanType plan;
-    private SubscriptionStatus status;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private PlanType planType;
+    private ProDetailsDTO proDetails;
+    private LocalDate createdAt;
 }
