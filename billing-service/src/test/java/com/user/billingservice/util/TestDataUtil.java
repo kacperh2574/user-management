@@ -1,34 +1,31 @@
 package com.user.billingservice.util;
 
 import com.stripe.model.checkout.Session;
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.model.PlanType;
+import com.user.billingservice.model.ProDetails;
 import com.user.billingservice.model.Subscription;
-import com.user.billingservice.model.SubscriptionStatus;
+import com.user.billingservice.model.Status;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 
 public class TestDataUtil {
 
-    public static Subscription createSubscription(UUID subscriptionId, UUID userId, PlanType plan) {
+    public static Subscription createSubscription(UUID subscriptionId, UUID userId, PlanType planType) {
         return Subscription.builder()
                 .id(subscriptionId)
                 .userId(userId)
-                .plan(plan)
-                .status(SubscriptionStatus.ACTIVE)
-                .startDate(LocalDate.now().minusMonths(2))
-                .endDate(LocalDate.now().minusMonths(1))
-                .build();
-    }
-
-    public static SubscriptionRequestDTO createSubscriptionRequestDTO() {
-        return SubscriptionRequestDTO.builder()
-                .planType(PlanType.PRO)
+                .planType(planType)
+                .proDetails(Objects.equals(planType, PlanType.FREE) ? null : ProDetails.builder()
+                        .status(Status.ACTIVE)
+                        .startDate(LocalDate.now().minusMonths(2))
+                        .endDate(LocalDate.now().minusMonths(1))
+                        .build())
                 .build();
     }
 

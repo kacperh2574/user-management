@@ -1,12 +1,12 @@
 package com.user.billingservice.service;
 
-import com.user.billingservice.dto.SubscriptionRequestDTO;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.exception.SubscriptionNotFoundException;
 import com.user.billingservice.mapper.SubscriptionMapper;
 import com.user.billingservice.model.PlanType;
+import com.user.billingservice.model.ProDetails;
 import com.user.billingservice.model.Subscription;
-import com.user.billingservice.model.SubscriptionStatus;
+import com.user.billingservice.model.Status;
 import com.user.billingservice.repository.SubscriptionRepository;
 import org.springframework.stereotype.Service;
 
@@ -24,8 +24,8 @@ public class SubscriptionService {
         this.subscriptionRepository = subscriptionRepository;
     }
 
-    public SubscriptionResponseDTO createSubscription(UUID userId, SubscriptionRequestDTO subscriptionRequestDTO) {
-        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(userId, subscriptionRequestDTO));
+    public SubscriptionResponseDTO createSubscription(UUID userId) {
+        Subscription newSubscription = subscriptionRepository.save(SubscriptionMapper.toModel(userId));
 
         return SubscriptionMapper.toDTO(newSubscription);
     }
@@ -44,17 +44,21 @@ public class SubscriptionService {
                 .toList();
     }
 
-    public void upgradeSubscriptionToPRO(UUID userId) {
+    public SubscriptionResponseDTO upgradeSubscriptionToPRO(UUID userId) {
         Subscription subscription = findSubscriptionByUserId(userId);
 
         subscription.toBuilder()
-                .plan(PlanType.PRO)
-                .status(SubscriptionStatus.ACTIVE)
-                .startDate(LocalDate.now())
-                .endDate(LocalDate.now().plusMonths(1))
+                .planType(PlanType.PRO)
+                .proDetails(ProDetails.builder()
+                        .status(Status.ACTIVE)
+                        .startDate(LocalDate.now())
+                        .endDate(LocalDate.now().plusMonths(1))
+                        .build())
                 .build();
 
         subscriptionRepository.save(subscription);
+
+        return SubscriptionMapper.toDTO(subscription);
     }
 
     public List<String> downgradeExpiredProSubscriptions() {
@@ -64,11 +68,14 @@ public class SubscriptionService {
 
         expired.forEach(subscription -> {
             Subscription downgraded = subscription.toBuilder()
-                    .plan(PlanType.FREE)
-                    .endDate(null)
+                    .planType(PlanType.FREE)
+                    .proDetails(ProDetails.builder()
+                            .status(Status.EXPIRED)
+                            .build())
                     .build();
 
             subscriptionRepository.save(downgraded);
+
             expiredIds.add(downgraded.getId().toString());
         });
 
@@ -82,6 +89,6 @@ public class SubscriptionService {
     }
 
     private List<Subscription> findSubscriptionsByEndDateAndPlan(LocalDate endDate, PlanType plan) {
-        return subscriptionRepository.findAllByEndDateBeforeAndPlan(endDate, plan);
+        return subscriptionRepository.findAllByProDetails_EndDateBeforeAndPlanType(endDate, plan);
     }
 }

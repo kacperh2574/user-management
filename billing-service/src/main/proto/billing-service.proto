@@ -11,10 +11,9 @@ message BillingRequest {
   string userId = 1;
   string name = 2;
   string email = 3;
-  string planType = 4;
 }
 
 message BillingResponse {
   string subscriptionId = 1;
-  string status = 2;
+  string planType = 2;
 }
