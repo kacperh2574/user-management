@@ -87,6 +87,6 @@ public class SubscriptionService {
     }
 
     private List<Subscription> findSubscriptionsByEndDateAndPlan(LocalDate endDate, PlanType plan) {
-        return subscriptionRepository.findAllByEndDateBeforeAndPlan(endDate, plan);
+        return subscriptionRepository.findAllByProDetails_EndDateBeforeAndPlanType(endDate, plan);
     }
 }

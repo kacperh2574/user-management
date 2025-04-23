@@ -116,7 +116,7 @@ class SubscriptionServiceTest {
     void downgradeExpiredProSubscriptions_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
         Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO, true);
 
-        when(subscriptionRepository.findAllByEndDateBeforeAndPlan(LocalDate.now(), PlanType.PRO))
+        when(subscriptionRepository.findAllByProDetails_EndDateBeforeAndPlanType(LocalDate.now(), PlanType.PRO))
                 .thenReturn(List.of(subscription));
 
         List<String> downgradedIds = subscriptionService.downgradeExpiredProSubscriptions();
