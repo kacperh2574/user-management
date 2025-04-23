@@ -23,7 +23,6 @@ public class BillingServiceGrpcClient {
                 .setUserId(userId)
                 .setName(name)
                 .setEmail(email)
-                .setPlanType("FREE")
                 .build();
 
         BillingResponse response = blockingStub.createSubscription(request);

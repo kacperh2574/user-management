@@ -25,7 +25,7 @@ public class BillingServiceGrpcClientTest {
     void createSubscription() {
         BillingResponse expectedResponse = BillingResponse.newBuilder()
                 .setSubscriptionId("12345")
-                .setStatus("ACTIVE")
+                .setPlanType("FREE")
                 .build();
 
         when(blockingStub.createSubscription(any(BillingRequest.class)))
