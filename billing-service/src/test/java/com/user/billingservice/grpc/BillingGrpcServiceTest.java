@@ -1,7 +1,7 @@
 package com.user.billingservice.grpc;
 
-import billing.BillingRequest;
-import billing.BillingResponse;
+import billing.CreateSubscriptionRequest;
+import billing.CreateSubscriptionResponse;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.model.PlanType;
 import com.user.billingservice.service.SubscriptionService;
@@ -20,7 +20,7 @@ public class BillingGrpcServiceTest {
 
     private BillingGrpcService billingGrpcService;
     private SubscriptionService subscriptionService;
-    private StreamObserver<BillingResponse> responseObserver;
+    private StreamObserver<CreateSubscriptionResponse> responseObserver;
 
     @BeforeEach
     public void setup() {
@@ -34,7 +34,7 @@ public class BillingGrpcServiceTest {
         UUID userId = UUID.randomUUID();
         UUID subscriptionId = UUID.randomUUID();
 
-        BillingRequest request = BillingRequest.newBuilder()
+        CreateSubscriptionRequest request = CreateSubscriptionRequest.newBuilder()
                 .setUserId(userId.toString())
                 .setName("Name")
                 .setEmail("test@email.com")
@@ -52,12 +52,12 @@ public class BillingGrpcServiceTest {
 
         billingGrpcService.createSubscription(request, responseObserver);
 
-        ArgumentCaptor<BillingResponse> captor = ArgumentCaptor.forClass(BillingResponse.class);
+        ArgumentCaptor<CreateSubscriptionResponse> captor = ArgumentCaptor.forClass(CreateSubscriptionResponse.class);
 
         verify(responseObserver).onNext(captor.capture());
         verify(responseObserver).onCompleted();
 
-        BillingResponse response = captor.getValue();
+        CreateSubscriptionResponse response = captor.getValue();
 
         assertEquals(subscriptionId.toString(), response.getSubscriptionId());
         assertEquals(PlanType.FREE.toString(), response.getPlanType());
