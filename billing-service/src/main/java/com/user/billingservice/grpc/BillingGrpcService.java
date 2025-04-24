@@ -1,7 +1,7 @@
 package com.user.billingservice.grpc;
 
-import billing.BillingRequest;
-import billing.BillingResponse;
+import billing.CreateSubscriptionRequest;
+import billing.CreateSubscriptionResponse;
 import billing.BillingServiceGrpc.BillingServiceImplBase;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.service.SubscriptionService;
@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static com.user.billingservice.mapper.BillingGrpcMapper.toBillingResponse;
+import static com.user.billingservice.mapper.BillingGrpcMapper.toCreateSubscriptionResponse;
 
 @GrpcService
 public class BillingGrpcService extends BillingServiceImplBase {
@@ -26,13 +26,13 @@ public class BillingGrpcService extends BillingServiceImplBase {
     }
 
     @Override
-    public void createSubscription(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
+    public void createSubscription(CreateSubscriptionRequest request, StreamObserver<CreateSubscriptionResponse> responseObserver) {
         log.info("Received createSubscription request: {}", request);
 
         UUID userId = UUID.fromString(request.getUserId());
         SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
 
-        BillingResponse response = toBillingResponse(subscriptionResponse);
+        CreateSubscriptionResponse response = toCreateSubscriptionResponse(subscriptionResponse);
 
         log.info("Subscription created: {}", response);
 
