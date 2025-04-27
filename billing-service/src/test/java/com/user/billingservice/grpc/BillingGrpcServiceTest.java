@@ -24,21 +24,19 @@ public class BillingGrpcServiceTest {
 
     private BillingGrpcService billingGrpcService;
     private SubscriptionService subscriptionService;
-    private StreamObserver<CreateSubscriptionResponse> createResponseObserver;
-    private StreamObserver<CancelSubscriptionResponse> cancelResponseObserver;
+
+    UUID userId = UUID.randomUUID();
+    UUID subscriptionId = UUID.randomUUID();
 
     @BeforeEach
     public void setup() {
         subscriptionService = mock(SubscriptionService.class);
         billingGrpcService = new BillingGrpcService(subscriptionService);
-        createResponseObserver = mock(StreamObserver.class);
-        cancelResponseObserver = mock(StreamObserver.class);
     }
 
     @Test
-    public void createSubscription() {
-        UUID userId = UUID.randomUUID();
-        UUID subscriptionId = UUID.randomUUID();
+    public void createSubscription_receivesCreateSubscriptionRequest_respondsWithCreateSubscriptionResponse() {
+        StreamObserver<CreateSubscriptionResponse> responseObserver = mock(StreamObserver.class);
 
         CreateSubscriptionRequest request = CreateSubscriptionRequest.newBuilder()
                 .setUserId(userId.toString())
@@ -56,12 +54,12 @@ public class BillingGrpcServiceTest {
         when(subscriptionService.createSubscription(eq(userId)))
                 .thenReturn(responseDTO);
 
-        billingGrpcService.createSubscription(request, createResponseObserver);
+        billingGrpcService.createSubscription(request, responseObserver);
 
         ArgumentCaptor<CreateSubscriptionResponse> captor = ArgumentCaptor.forClass(CreateSubscriptionResponse.class);
 
-        verify(createResponseObserver).onNext(captor.capture());
-        verify(createResponseObserver).onCompleted();
+        verify(responseObserver).onNext(captor.capture());
+        verify(responseObserver).onCompleted();
 
         CreateSubscriptionResponse response = captor.getValue();
 
@@ -70,9 +68,8 @@ public class BillingGrpcServiceTest {
     }
 
     @Test
-    public void cancelSubscription() {
-        UUID userId = UUID.randomUUID();
-        UUID subscriptionId = UUID.randomUUID();
+    public void cancelSubscription_receivesCancelSubscriptionRequest_respondsWithCancelSubscriptionResponse() {
+        StreamObserver<CancelSubscriptionResponse> responseObserver = mock(StreamObserver.class);
 
         CancelSubscriptionRequest request = CancelSubscriptionRequest.newBuilder()
                 .setUserId(userId.toString())
@@ -90,12 +87,12 @@ public class BillingGrpcServiceTest {
         when(subscriptionService.cancelProSubscription(eq(userId)))
                 .thenReturn(responseDTO);
 
-        billingGrpcService.cancelSubscription(request, cancelResponseObserver);
+        billingGrpcService.cancelSubscription(request, responseObserver);
 
         ArgumentCaptor<CancelSubscriptionResponse> captor = ArgumentCaptor.forClass(CancelSubscriptionResponse.class);
 
-        verify(cancelResponseObserver).onNext(captor.capture());
-        verify(cancelResponseObserver).onCompleted();
+        verify(responseObserver).onNext(captor.capture());
+        verify(responseObserver).onCompleted();
 
         CancelSubscriptionResponse response = captor.getValue();
 

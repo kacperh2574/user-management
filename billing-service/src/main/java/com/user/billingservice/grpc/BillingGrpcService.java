@@ -30,7 +30,7 @@ public class BillingGrpcService extends BillingServiceImplBase {
 
     @Override
     public void createSubscription(CreateSubscriptionRequest request, StreamObserver<CreateSubscriptionResponse> responseObserver) {
-        log.info("Received CreateSubscription request: {}", request);
+        log.info("Received CreateSubscription request from User Service gRPC: {}", request);
 
         UUID userId = UUID.fromString(request.getUserId());
         SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
@@ -45,7 +45,7 @@ public class BillingGrpcService extends BillingServiceImplBase {
 
     @Override
     public void cancelSubscription(CancelSubscriptionRequest request, StreamObserver<CancelSubscriptionResponse> responseObserver) {
-        log.info("Received CancelSubscription request: {}", request);
+        log.info("Received CancelSubscription request from User Service gRPC: {}", request);
 
         UUID userId = UUID.fromString(request.getUserId());
         SubscriptionResponseDTO subscriptionResponse = subscriptionService.cancelProSubscription(userId);

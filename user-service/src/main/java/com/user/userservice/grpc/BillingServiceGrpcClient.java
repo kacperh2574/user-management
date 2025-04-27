@@ -29,7 +29,7 @@ public class BillingServiceGrpcClient {
 
         CreateSubscriptionResponse response = blockingStub.createSubscription(request);
 
-        log.info("Received CreateSubscriptionResponse from Billing Service gRPC: {}", response);
+        log.info("Received CreateSubscription response from Billing Service gRPC: {}", response);
 
         return response;
     }
@@ -41,7 +41,7 @@ public class BillingServiceGrpcClient {
 
         CancelSubscriptionResponse response = blockingStub.cancelSubscription(request);
 
-        log.info("Received CancelSubscriptionResponse from Billing Service gRPC: {}", response);
+        log.info("Received CancelSubscription response from Billing Service gRPC: {}", response);
 
         return response;
     }

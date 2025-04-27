@@ -20,7 +20,7 @@ public class BillingServiceGrpcClientTest {
     }
 
     @Test
-    void createSubscription() {
+    void createSubscription_requestsWithCreateSubscriptionRequest_receivesCreateSubscriptionResponse() {
         CreateSubscriptionResponse expectedResponse = CreateSubscriptionResponse.newBuilder()
                 .setSubscriptionId("12345")
                 .setPlanType("FREE")
@@ -39,7 +39,7 @@ public class BillingServiceGrpcClientTest {
     }
 
     @Test
-    void cancelSubscription() {
+    void cancelSubscription_requestsWithCancelSubscriptionRequest_receivesCancelSubscriptionResponse() {
         CancelSubscriptionResponse expectedResponse = CancelSubscriptionResponse.newBuilder()
                 .setSubscriptionId("12345")
                 .setPlanType("FREE")
