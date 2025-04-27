@@ -20,7 +20,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.List;
 
-import static com.user.billingservice.util.TestDataUtil.createSubscription;
+import static com.user.billingservice.util.TestDataUtil.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -36,9 +36,7 @@ class SubscriptionServiceTest {
     @InjectMocks
     SubscriptionService subscriptionService;
 
-    UUID userId = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
-
-    Subscription subscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+    Subscription SUBSCRIPTION = createFreeSubscription(UUID.randomUUID());
 
     @BeforeEach
     void setUp() {
@@ -47,36 +45,36 @@ class SubscriptionServiceTest {
 
     @Test
     void createSubscription_returnsCreatedSubscription() {
-        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(subscription);
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(SUBSCRIPTION);
 
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(USER_ID);
 
         assertThat(subscriptionResponse)
                 .usingRecursiveComparison()
-                .isEqualTo(SubscriptionMapper.toDTO(subscription));
+                .isEqualTo(SubscriptionMapper.toDTO(SUBSCRIPTION));
     }
 
     @Test
     void getSubscription_returnsSubscription_whenSubscriptionExists() {
-        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(SUBSCRIPTION));
 
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.getSubscription(userId);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.getSubscription(USER_ID);
 
         assertThat(subscriptionResponse)
                 .usingRecursiveComparison()
-                .isEqualTo(SubscriptionMapper.toDTO(subscription));
+                .isEqualTo(SubscriptionMapper.toDTO(SUBSCRIPTION));
     }
 
     @Test
     void getSubscription_throwsException_whenSubscriptionDoesNotExist() {
-        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.empty());
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.getSubscription(userId));
+        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.getSubscription(USER_ID));
     }
 
     @Test
     void getSubscriptions_returnsAllSubscriptions() {
-        List<Subscription> subscriptions = List.of(subscription);
+        List<Subscription> subscriptions = List.of(SUBSCRIPTION);
         when(subscriptionRepository.findAll()).thenReturn(subscriptions);
 
         List<SubscriptionResponseDTO> subscriptionsResponse = subscriptionService.getSubscriptions();
@@ -87,28 +85,48 @@ class SubscriptionServiceTest {
     }
 
     @Test
-    void upgradeToProSubscription_returnsSubscriptionWithUpgradedPlan() {
-        Subscription proSubscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+    void cancelProSubscription_returnsSubscriptionWithFreePlan_andCancelledStatus() {
+        Subscription cancelledSubscription = createCancelledSubscription();
 
-        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.of(subscription));
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(SUBSCRIPTION));
+        when(subscriptionRepository.save(any(Subscription.class))).thenReturn(cancelledSubscription);
+
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.cancelProSubscription(USER_ID);
+
+        assertEquals(PlanType.FREE, subscriptionResponse.getPlanType());
+        assertEquals(Status.CANCELLED, subscriptionResponse.getProDetails().getStatus());
+    }
+
+    @Test
+    void cancelProSubscription_throwsException_whenSubscriptionDoesNotExist() {
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.cancelProSubscription(USER_ID));
+    }
+
+    @Test
+    void upgradeSubscriptionToPRO_returnsSubscriptionWithProPlan_andActiveStatus() {
+        Subscription proSubscription = createProSubscription();
+
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.of(SUBSCRIPTION));
         when(subscriptionRepository.save(any(Subscription.class))).thenReturn(proSubscription);
 
-        SubscriptionResponseDTO subscriptionResponse = subscriptionService.upgradeSubscriptionToPRO(userId);
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.upgradeSubscriptionToPRO(USER_ID);
 
         assertEquals(PlanType.PRO, subscriptionResponse.getPlanType());
         assertEquals(Status.ACTIVE, subscriptionResponse.getProDetails().getStatus());
     }
 
     @Test
-    void upgradeToProSubscription_throwsException_whenSubscriptionDoesNotExist() {
-        when(subscriptionRepository.findByUserId(userId)).thenReturn(Optional.empty());
+    void upgradeSubscriptionToPRO_throwsException_whenSubscriptionDoesNotExist() {
+        when(subscriptionRepository.findByUserId(USER_ID)).thenReturn(Optional.empty());
 
-        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.upgradeSubscriptionToPRO(userId));
+        assertThrows(SubscriptionNotFoundException.class, () -> subscriptionService.upgradeSubscriptionToPRO(USER_ID));
     }
 
     @Test
-    void downgradeExpiredProSubscriptionIds_returnsIdsOfSavedSubscriptionsWithDowngradedPlan() {
-        Subscription expiredSubscription = createSubscription(UUID.randomUUID(), userId, PlanType.PRO);
+    void downgradeExpiredProSubscription_returnsIdsOfSavedSubscriptionsWithFreePlan_andExpiredStatus() {
+        Subscription expiredSubscription = createExpiredSubscription();
 
         when(subscriptionRepository.findAllByProDetails_EndDateBeforeAndPlanType(LocalDate.now(), PlanType.PRO))
                 .thenReturn(List.of(expiredSubscription));

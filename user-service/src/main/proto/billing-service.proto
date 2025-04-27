@@ -4,16 +4,27 @@ option java_multiple_files = true;
 option java_package = "billing";
 
 service BillingService {
-  rpc CreateSubscription (BillingRequest) returns (BillingResponse);
+  rpc CreateSubscription (CreateSubscriptionRequest) returns (CreateSubscriptionResponse);
+  rpc CancelSubscription (CancelSubscriptionRequest) returns (CancelSubscriptionResponse);
 }
 
-message BillingRequest {
+message CreateSubscriptionRequest {
   string userId = 1;
   string name = 2;
   string email = 3;
 }
 
-message BillingResponse {
+message CreateSubscriptionResponse {
   string subscriptionId = 1;
   string planType = 2;
+}
+
+message CancelSubscriptionRequest {
+  string userId = 1;
+}
+
+message CancelSubscriptionResponse {
+  string subscriptionId = 1;
+  string planType = 2;
+  string proStatus = 3;
 }

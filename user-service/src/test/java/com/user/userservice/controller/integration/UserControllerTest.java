@@ -1,6 +1,7 @@
 package com.user.userservice.controller.integration;
 
-import billing.BillingResponse;
+import billing.CancelSubscriptionResponse;
+import billing.CreateSubscriptionResponse;
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
 import com.user.userservice.grpc.BillingServiceGrpcClient;
@@ -46,7 +47,7 @@ public class UserControllerTest {
     @Test
     void createUser() {
         when(billingServiceGrpcClient.createSubscription(any(), any(), any()))
-                .thenReturn(BillingResponse.newBuilder().build());
+                .thenReturn(CreateSubscriptionResponse.newBuilder().build());
         doNothing().when(kafkaProducer).sendEvent(any());
 
         UserRequestDTO userRequestDTO = createUserRequestDTO();
@@ -103,6 +104,9 @@ public class UserControllerTest {
 
     @Test
     void deleteUser() {
+        when(billingServiceGrpcClient.cancelSubscription(any()))
+                .thenReturn(CancelSubscriptionResponse.newBuilder().build());
+
         User user = userRepository.save(createUserWithoutId());
 
         ResponseEntity<Void> response = restTemplate.exchange(

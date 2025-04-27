@@ -1,7 +1,9 @@
 package com.user.billingservice.grpc;
 
-import billing.BillingRequest;
-import billing.BillingResponse;
+import billing.CancelSubscriptionRequest;
+import billing.CancelSubscriptionResponse;
+import billing.CreateSubscriptionRequest;
+import billing.CreateSubscriptionResponse;
 import billing.BillingServiceGrpc.BillingServiceImplBase;
 import com.user.billingservice.dto.SubscriptionResponseDTO;
 import com.user.billingservice.service.SubscriptionService;
@@ -12,7 +14,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 
-import static com.user.billingservice.mapper.BillingGrpcMapper.toBillingResponse;
+import static com.user.billingservice.mapper.BillingGrpcMapper.toCancelSubscriptionResponse;
+import static com.user.billingservice.mapper.BillingGrpcMapper.toCreateSubscriptionResponse;
 
 @GrpcService
 public class BillingGrpcService extends BillingServiceImplBase {
@@ -26,15 +29,30 @@ public class BillingGrpcService extends BillingServiceImplBase {
     }
 
     @Override
-    public void createSubscription(BillingRequest request, StreamObserver<BillingResponse> responseObserver) {
-        log.info("Received createSubscription request: {}", request);
+    public void createSubscription(CreateSubscriptionRequest request, StreamObserver<CreateSubscriptionResponse> responseObserver) {
+        log.info("Received CreateSubscription request from User Service gRPC: {}", request);
 
         UUID userId = UUID.fromString(request.getUserId());
         SubscriptionResponseDTO subscriptionResponse = subscriptionService.createSubscription(userId);
 
-        BillingResponse response = toBillingResponse(subscriptionResponse);
+        CreateSubscriptionResponse response = toCreateSubscriptionResponse(subscriptionResponse);
 
         log.info("Subscription created: {}", response);
+
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void cancelSubscription(CancelSubscriptionRequest request, StreamObserver<CancelSubscriptionResponse> responseObserver) {
+        log.info("Received CancelSubscription request from User Service gRPC: {}", request);
+
+        UUID userId = UUID.fromString(request.getUserId());
+        SubscriptionResponseDTO subscriptionResponse = subscriptionService.cancelProSubscription(userId);
+
+        CancelSubscriptionResponse response = toCancelSubscriptionResponse(subscriptionResponse);
+
+        log.info("Subscription cancelled: {}", response);
 
         responseObserver.onNext(response);
         responseObserver.onCompleted();

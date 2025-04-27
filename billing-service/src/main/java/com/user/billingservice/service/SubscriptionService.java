@@ -44,17 +44,30 @@ public class SubscriptionService {
                 .toList();
     }
 
+    public SubscriptionResponseDTO cancelProSubscription(UUID userId) {
+        Subscription subscription = findSubscriptionByUserId(userId);
+
+        subscription.setPlanType(PlanType.FREE);
+        subscription.setProDetails(ProDetails.builder()
+                .status(Status.CANCELLED)
+                .build()
+        );
+
+        subscriptionRepository.save(subscription);
+
+        return SubscriptionMapper.toDTO(subscription);
+    }
+
     public SubscriptionResponseDTO upgradeSubscriptionToPRO(UUID userId) {
         Subscription subscription = findSubscriptionByUserId(userId);
 
-        subscription.toBuilder()
-                .planType(PlanType.PRO)
-                .proDetails(ProDetails.builder()
-                        .status(Status.ACTIVE)
-                        .startDate(LocalDate.now())
-                        .endDate(LocalDate.now().plusMonths(1))
-                        .build())
-                .build();
+        subscription.setPlanType(PlanType.PRO);
+        subscription.setProDetails(ProDetails.builder()
+                .status(Status.ACTIVE)
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusMonths(1))
+                .build()
+        );
 
         subscriptionRepository.save(subscription);
 
