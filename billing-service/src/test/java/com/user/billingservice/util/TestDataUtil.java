@@ -11,20 +11,58 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 
 public class TestDataUtil {
 
-    public static Subscription createSubscription(UUID subscriptionId, UUID userId, PlanType planType) {
+    public static UUID USER_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174000");
+    public static UUID SUBSCRIPTION_ID = UUID.fromString("123e4567-e89b-12d3-a456-426614174001");
+    public static LocalDate NOW = LocalDate.now();
+
+    public static Subscription createFreeSubscription(UUID subscriptionId) {
         return Subscription.builder()
                 .id(subscriptionId)
-                .userId(userId)
-                .planType(planType)
-                .proDetails(Objects.equals(planType, PlanType.FREE) ? null : ProDetails.builder()
+                .userId(USER_ID)
+                .planType(PlanType.FREE)
+                .proDetails(null)
+                .build();
+    }
+
+    public static Subscription createProSubscription() {
+        return Subscription.builder()
+                .id(SUBSCRIPTION_ID)
+                .userId(USER_ID)
+                .planType(PlanType.PRO)
+                .proDetails(ProDetails.builder()
                         .status(Status.ACTIVE)
-                        .startDate(LocalDate.now().minusMonths(2))
-                        .endDate(LocalDate.now().minusMonths(1))
+                        .startDate(NOW)
+                        .endDate(NOW.plusMonths(1))
+                        .build())
+                .build();
+    }
+
+    public static Subscription createCancelledSubscription() {
+        return Subscription.builder()
+                .id(SUBSCRIPTION_ID)
+                .userId(USER_ID)
+                .planType(PlanType.FREE)
+                .proDetails(ProDetails.builder()
+                        .status(Status.CANCELLED)
+                        .startDate(NOW.minusWeeks(1))
+                        .endDate(NOW)
+                        .build())
+                .build();
+    }
+
+    public static Subscription createExpiredSubscription() {
+        return Subscription.builder()
+                .id(SUBSCRIPTION_ID)
+                .userId(USER_ID)
+                .planType(PlanType.PRO)
+                .proDetails(ProDetails.builder()
+                        .status(Status.ACTIVE)
+                        .startDate(NOW.minusMonths(1))
+                        .endDate(NOW)
                         .build())
                 .build();
     }
