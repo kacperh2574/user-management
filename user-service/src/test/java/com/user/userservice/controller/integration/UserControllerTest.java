@@ -1,5 +1,6 @@
 package com.user.userservice.controller.integration;
 
+import billing.CancelSubscriptionResponse;
 import billing.CreateSubscriptionResponse;
 import com.user.userservice.dto.UserRequestDTO;
 import com.user.userservice.dto.UserResponseDTO;
@@ -103,6 +104,9 @@ public class UserControllerTest {
 
     @Test
     void deleteUser() {
+        when(billingServiceGrpcClient.cancelSubscription(any()))
+                .thenReturn(CancelSubscriptionResponse.newBuilder().build());
+
         User user = userRepository.save(createUserWithoutId());
 
         ResponseEntity<Void> response = restTemplate.exchange(

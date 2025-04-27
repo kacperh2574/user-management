@@ -122,6 +122,8 @@ public class UserServiceTest {
 
         userService.deleteUser(id);
 
+        verify(billingServiceGrpcClient, times(1))
+                .cancelSubscription(id.toString());
         verify(userRepository, times(1)).deleteById(id);
     }
 

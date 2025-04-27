@@ -71,6 +71,8 @@ public class UserService {
     public void deleteUser(UUID id) {
         findUserById(id);
 
+        billingServiceGrpcClient.cancelSubscription(id.toString());
+
         userRepository.deleteById(id);
     }
 
