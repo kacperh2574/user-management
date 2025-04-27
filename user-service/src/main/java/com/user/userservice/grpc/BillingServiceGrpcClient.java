@@ -1,8 +1,10 @@
 package com.user.userservice.grpc;
 
-import billing.BillingRequest;
-import billing.BillingResponse;
 import billing.BillingServiceGrpc.BillingServiceBlockingStub;
+import billing.CancelSubscriptionRequest;
+import billing.CancelSubscriptionResponse;
+import billing.CreateSubscriptionRequest;
+import billing.CreateSubscriptionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -18,16 +20,28 @@ public class BillingServiceGrpcClient {
         this.blockingStub = blockingStub;
     }
 
-    public BillingResponse createSubscription(String userId, String name, String email) {
-        BillingRequest request = BillingRequest.newBuilder()
+    public CreateSubscriptionResponse createSubscription(String userId, String name, String email) {
+        CreateSubscriptionRequest request = CreateSubscriptionRequest.newBuilder()
                 .setUserId(userId)
                 .setName(name)
                 .setEmail(email)
                 .build();
 
-        BillingResponse response = blockingStub.createSubscription(request);
+        CreateSubscriptionResponse response = blockingStub.createSubscription(request);
 
-        log.info("Received response from Billing Service gRPC: {}", response);
+        log.info("Received CreateSubscriptionResponse from Billing Service gRPC: {}", response);
+
+        return response;
+    }
+
+    public CancelSubscriptionResponse cancelSubscription(String userId) {
+        CancelSubscriptionRequest request = CancelSubscriptionRequest.newBuilder()
+                .setUserId(userId)
+                .build();
+
+        CancelSubscriptionResponse response = blockingStub.cancelSubscription(request);
+
+        log.info("Received CancelSubscriptionResponse from Billing Service gRPC: {}", response);
 
         return response;
     }
