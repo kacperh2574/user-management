@@ -5,6 +5,7 @@ option java_package = "billing";
 
 service BillingService {
   rpc CreateSubscription (CreateSubscriptionRequest) returns (CreateSubscriptionResponse);
+  rpc CancelSubscription (CancelSubscriptionRequest) returns (CancelSubscriptionResponse);
 }
 
 message CreateSubscriptionRequest {
@@ -16,4 +17,14 @@ message CreateSubscriptionRequest {
 message CreateSubscriptionResponse {
   string subscriptionId = 1;
   string planType = 2;
+}
+
+message CancelSubscriptionRequest {
+  string userId = 1;
+}
+
+message CancelSubscriptionResponse {
+  string subscriptionId = 1;
+  string planType = 2;
+  string proStatus = 3;
 }
